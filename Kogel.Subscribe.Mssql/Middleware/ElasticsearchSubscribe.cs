@@ -46,7 +46,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
             {
                 _isFirstSubscribe = false;
                 //验证索引是否存在并创建索引
-                CreateIndex(_client);
+                CreateIndex();
             }
             foreach (var message in messageList)
             {
@@ -107,10 +107,10 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         /// <param name="elasticClient"></param>
         /// <param name="indexName"></param>
-        private void CreateIndex(ElasticClient elasticClient)
+        private void CreateIndex()
         {
             string indexName = GetIndexName();
-            if (!(elasticClient.Indices.Exists(indexName)).Exists)
+            if (!(_client.Indices.Exists(indexName)).Exists)
             {
                 var indsettings = new IndexSettings(_esIndexSetting)
                 {
@@ -137,7 +137,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
                 indsettings.Analysis.Analyzers.Add("ngram_analyzer_long", longAnalyzer);
                 indsettings.Analysis.Tokenizers.Add("ngram_tokenizer_long", new NGramTokenizer { MinGram = 5, MaxGram = 5 });
                 var indexState = new IndexState { Settings = indsettings };
-                var response = elasticClient.Indices
+                var response = _client.Indices
                     .Create(indexName, p => p.InitializeUsing(indexState)
                         .Map<T>(x => x.AutoMap<T>()
                             .Properties<T>((propertiesSelector) =>
