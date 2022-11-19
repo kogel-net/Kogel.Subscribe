@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.32929.386
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kogel.Subscribe.Mssql", "Kogel.Subscribe.Mssql\Kogel.Subscribe.Mssql.csproj", "{62C8262E-FA64-403A-B531-AF16F24EDEC4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kogel.Subscribe.Mssql.Test", "Kogel.Subscribe.Mssql.Test\Kogel.Subscribe.Mssql.Test.csproj", "{850E0489-080B-4C60-B480-A0610082E19E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kogel.Subscribe.Mssql.Test", "Kogel.Subscribe.Mssql.Test\Kogel.Subscribe.Mssql.Test.csproj", "{8124F96A-6EC8-436B-8B41-1B569F99C87F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{62C8262E-FA64-403A-B531-AF16F24EDEC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62C8262E-FA64-403A-B531-AF16F24EDEC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62C8262E-FA64-403A-B531-AF16F24EDEC4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{850E0489-080B-4C60-B480-A0610082E19E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{850E0489-080B-4C60-B480-A0610082E19E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{850E0489-080B-4C60-B480-A0610082E19E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{850E0489-080B-4C60-B480-A0610082E19E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8124F96A-6EC8-436B-8B41-1B569F99C87F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8124F96A-6EC8-436B-8B41-1B569F99C87F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8124F96A-6EC8-436B-8B41-1B569F99C87F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8124F96A-6EC8-436B-8B41-1B569F99C87F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

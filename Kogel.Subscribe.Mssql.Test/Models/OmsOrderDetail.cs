@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Kogel.Dapper.Extension;
 using Kogel.Dapper.Extension.Attributes;
+using Nest;
 
 namespace Kogel.Subscribe.Mssql.Test.Models
 {
@@ -9,37 +11,43 @@ namespace Kogel.Subscribe.Mssql.Test.Models
     /// 
     /// </summary>
     [Display(Rename = "t_oms_order_detail")]
-    public class OmsOrderDetail
+    [ElasticsearchType(RelationName = "t_oms_order_detail", IdProperty = "Id")]
+    public class OmsOrderDetail : IBaseEntity<OmsOrderDetail, int>
     {
         /// <summary>
         /// 
         /// </summary>
         [Identity]
         [Display(Rename = "id")]
-        public int Id { get; set; }
+        [Nest.PropertyName("id")]
+        public override int Id { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         [Display(Rename = "name")]
+        [Nest.PropertyName("id")]
         public string Name { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         [Display(Rename = "trade_id")]
+        [Nest.PropertyName("trade_id")]
         public int? TradeId { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         [Display(Rename = "descption")]
+        [Nest.PropertyName("descption")]
         public string Descption { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         [Display(Rename = "create_time")]
+        [Nest.PropertyName("create_time")]
         public DateTime CreateTime { get; set; }
     }
 }

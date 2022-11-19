@@ -13,7 +13,7 @@ namespace Kogel.Subscribe.Mssql
         /// <summary>
         /// 
         /// </summary>
-        private readonly Analysis<T> _analysis;
+        private readonly SubscribeAnalysis<T> _analysis;
 
         /// <summary>
         /// 
@@ -33,7 +33,7 @@ namespace Kogel.Subscribe.Mssql
             _options = new OptionsBuilder();
             OnConfiguring(_options);
             //启动解析监听
-            _analysis = new Analysis<T>();
+            _analysis = new SubscribeAnalysis<T>();
             _analysisThread = new Thread(() =>
             {
                 _analysis.Register(this, _options);

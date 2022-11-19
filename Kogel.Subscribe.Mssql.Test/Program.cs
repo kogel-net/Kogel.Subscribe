@@ -8,6 +8,9 @@ using System.Linq;
 using Confluent.Kafka;
 using System.Diagnostics.Contracts;
 using Kogel.Subscribe.Mssql.Test.Models;
+using Kogel.Dapper.Extension.MsSql.Extension;
+using Kogel.Dapper.Extension;
+using Kogel.Subscribe.Mssql.Entites.Enum;
 
 namespace Kogel.Subscribe.Mssql.Test
 {
@@ -17,9 +20,11 @@ namespace Kogel.Subscribe.Mssql.Test
         {
             Console.WriteLine("Hello World!");
 
-            //OrderDetailDataSyncEs dataSyncEs = new OrderDetailDataSyncEs();
+            //EntityCache.Register(typeof(OmsOrderDetail));
+            //var codeFirst = new CodeFirst(new SqlConnection("server=192.168.159.128;user id=sa;password=P@ssw0rd,;persistsecurityinfo=True;database=KogelTest"));
+            //codeFirst.SyncStructure();
 
-            Kogel.Subscribe.Mssql.Program.Run();
+            SubscribeProgram.Run();
 
             Console.ReadLine();
         }
@@ -32,17 +37,17 @@ namespace Kogel.Subscribe.Mssql.Test
     {
         public override void OnConfiguring(OptionsBuilder builder)
         {
-            builder.BuildConnection("server=172.18.44.111;user id=sa;password=p@ssw0rd;persistsecurityinfo=True;database=KogelTest")
-                .BuildLimit(100)
-                   //.BuildFirstScanFull(true)
+            builder.BuildConnection("server=192.168.159.128;user id=sa;password=P@ssw0rd,;persistsecurityinfo=True;database=KogelTest")
+            //builder.BuildConnection("server=172.18.44.111;user id=sa;password=p@ssw0rd;persistsecurityinfo=True;database=KogelTest")
                    //.BuilderRabbitmq(new RabbitMQ.Client.ConnectionFactory
                    //{           
                    //})
-                   //.BuildKafka(new Confluent.Kafka.ProducerConfig {
-                   //    BootstrapServers = "localhost:9092",
-                   //    Acks = Acks.All
+                   //.BuildKafka(new ProducerConfig
+                   //{
+                   //    BootstrapServers = "192.168.159.128:9092",
+                   //    Acks = Acks.None
                    //})
-                   //.BuildTopic("kogel_subscribe_t_oms_order_detail")
+                   .BuildElasticsearch(new Nest.ConnectionSettings(new Uri("http://192.168.159.128:9200/")))
                    ;
         }
 

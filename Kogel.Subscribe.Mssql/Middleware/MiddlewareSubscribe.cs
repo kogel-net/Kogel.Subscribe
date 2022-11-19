@@ -36,14 +36,19 @@ namespace Kogel.Subscribe.Mssql.Middleware
             this._queueSubscribeList = new List<ISubscribe<T>>();
             if (_options.MiddlewareTypeList.Any())
             {
+                if (_options.MiddlewareTypeList.Contains(MiddlewareEnum.Elasticsearch))
+                {
+                    var queueSubscribe = new ElasticsearchSubscribe<T>(_options);
+                    _queueSubscribeList.Add(queueSubscribe);
+                }
                 if (_options.MiddlewareTypeList.Contains(MiddlewareEnum.Kafka))
                 {
                     var queueSubscribe = new KafkaSubscribe<T>(_options);
                     _queueSubscribeList.Add(queueSubscribe);
                 }
-                if (_options.MiddlewareTypeList.Contains(MiddlewareEnum.Kafka))
+                if (_options.MiddlewareTypeList.Contains(MiddlewareEnum.RabbitMQ))
                 {
-                    var queueSubscribe = new RabbitmqSubscribe<T>(_options);
+                    var queueSubscribe = new RabbitMQSubscribe<T>(_options);
                     _queueSubscribeList.Add(queueSubscribe);
                 }
             }

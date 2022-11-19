@@ -12,13 +12,14 @@ using System.Reflection;
 using Kogel.Subscribe.Mssql.Entites.Enum;
 using Kogel.Subscribe.Mssql.Middleware;
 using Kogel.Dapper.Extension;
+using System.Data;
 
 namespace Kogel.Subscribe.Mssql
 {
     /// <summary>
     /// 解析
     /// </summary>
-    public sealed class Analysis<T> : IDisposable
+    public sealed class SubscribeAnalysis<T> : IDisposable
         where T : class
     {
         /// <summary>
@@ -53,7 +54,7 @@ namespace Kogel.Subscribe.Mssql
         /// <param name="handler"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        internal Analysis<T> Register(ISubscribe<T> handler, OptionsBuilder options)
+        internal SubscribeAnalysis<T> Register(ISubscribe<T> handler, OptionsBuilder options)
         {
             this._options = options;
             EventBus += new SubscribeHandler(handler.Subscribes);
@@ -101,7 +102,7 @@ namespace Kogel.Subscribe.Mssql
                 }
                 else
                 {
-                    Thread.Sleep(_options.ScanInterval ?? 5000);
+                    Thread.Sleep(_options.CdcConfig.ScanInterval);
                 }
             }
         }
@@ -124,7 +125,7 @@ namespace Kogel.Subscribe.Mssql
                              .ToList();
         }
 
-     
+
         //代码首次进入
         private static bool _isCodeFirst = true;
         private static readonly object _checkFirstLock = new object();
@@ -167,7 +168,8 @@ namespace Kogel.Subscribe.Mssql
                     else
                     {
                         //检查最新的变更
-                        _lastSeqval = _repoistory.Orm.QueryFirstOrDefault<string>($"SELECT TOP 1 convert(varchar(50), [__$seqval], 1) FROM {GetCtTableName()} order by __$seqval desc") ?? "0";
+                        if (_options.CdcConfig.OffsetPosition == OffsetPositionEnum.Last)
+                            _lastSeqval = _repoistory.Orm.QueryFirstOrDefault<string>($"SELECT TOP 1 convert(varchar(50), [__$seqval], 1) FROM {GetCtTableName()} order by __$seqval desc") ?? "0";
                     }
                     if (_isCodeFirst)
                     {
@@ -177,7 +179,7 @@ namespace Kogel.Subscribe.Mssql
                             //必须在表开启后才能执行清楚计划
                             _repoistory.Orm.Execute($@"exec sys.sp_cdc_change_job
                                                 @job_type = 'cleanup',
-                                                @retention = {_options.Retention},
+                                                @retention = {_options.CdcConfig.Retention},
                                                 @threshold = 5000");
                         }
                     }
@@ -194,7 +196,7 @@ namespace Kogel.Subscribe.Mssql
         private List<CT<T>> CheckFirstScanFull()
         {
             List<CT<T>> tableList = default;
-            if (_options.IsFirstScanFull)
+            if (_options.CdcConfig.IsFirstScanFull)
             {
 #if DEBUG
                 if (_lastId == 0)
@@ -206,7 +208,7 @@ namespace Kogel.Subscribe.Mssql
                 tableList = _repoistory.QuerySet()
                       .Where($"[{idName}] > {_lastId}")
                       .OrderBy($" {idName} ASC ")
-                      .Page(1, _options.Limit)
+                      .Page(1, _options.CdcConfig.Limit)
                       .Select(x => new CT<T>
                       {
                           Seqval = "0",
@@ -218,9 +220,9 @@ namespace Kogel.Subscribe.Mssql
                     _lastId = Convert.ToInt64(idProperty.GetValue(tableList.LastOrDefault().Result));
                 }
                 //表示扫描完成
-                if (tableList.Count < _options.Limit)
+                if (tableList.Count < _options.CdcConfig.Limit)
                 {
-                    _options.IsFirstScanFull = false;
+                    _options.CdcConfig.IsFirstScanFull = false;
                 }
             }
             return tableList;
@@ -269,8 +271,8 @@ namespace Kogel.Subscribe.Mssql
                                         FROM {GetCtTableName()} 
                                         WHERE [__$seqval] > {_lastSeqval}
 									    ) T
-								    WHERE T.[row] BETWEEN 1 AND {_options.Limit}";
-            var changeData = _repoistory.Orm.QueryDataSet(new SqlDataAdapter(), execSql).ConvertCTData<T>();
+								    WHERE T.[row] BETWEEN 1 AND {_options.CdcConfig.Limit}";
+            var changeData = ToCT(_repoistory.Orm.QueryDataSet(new SqlDataAdapter(), execSql));
             //记录本次seq
             if (changeData != null && changeData.Any())
                 _lastSeqval = changeData.LastOrDefault().Seqval;
@@ -334,6 +336,50 @@ namespace Kogel.Subscribe.Mssql
             var dbConnection = _repoistory.Orm as DbConnection;
             return dbConnection?.Database;
         }
+
+        /// <summary>
+        /// 转换成CT<T>泛型数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dataSet"></param>
+        /// <returns></returns>
+        public static List<CT<T>> ToCT(DataSet dataSet)
+        {
+            List<CT<T>> ctList = new List<CT<T>>();
+            var entity = EntityCache.QueryEntity(typeof(T));
+            if (dataSet != null && dataSet.Tables.Count != 0 && dataSet.Tables[0].Rows.Count != 0)
+            {
+                foreach (DataRow row in dataSet.Tables[0].Rows)
+                {
+                    CT<T> cT = new CT<T>();
+                    cT.Seqval = row["__$seqval"] != null && row["__$seqval"] != DBNull.Value ? Convert.ToString(row["__$seqval"]) : default;
+                    cT.Operation = (CTOperationEnum)Convert.ToInt32(row["__$operation"]);
+                    //设置表变更信息
+                    T result = Activator.CreateInstance<T>();
+                    for (var i = 0; i < dataSet.Tables[0].Columns.Count; i++)
+                    {
+                        var column = dataSet.Tables[0].Columns[i];
+                        var field = entity.EntityFieldList.FirstOrDefault(x => x.FieldName == column.ColumnName);
+                        if (field != null)
+                        {
+                            var fieldValue = row[column.ColumnName];
+                            if (fieldValue != null && fieldValue != DBNull.Value)
+                            {
+                                var propertyType = field.PropertyInfo.PropertyType;
+                                //可能是可空类型
+                                if (propertyType.FullName.Contains("System.Nullable") && propertyType.GenericTypeArguments != null && propertyType.GenericTypeArguments.Count() != 0)
+                                    propertyType = field.PropertyInfo.PropertyType.GenericTypeArguments[0];
+                                field.PropertyInfo.SetValue(result, Convert.ChangeType(fieldValue, propertyType));
+                            }
+                        }
+                    }
+                    cT.Result = result;
+                    ctList.Add(cT);
+                }
+            }
+            return ctList;
+        }
+
 
         /// <summary>
         /// 

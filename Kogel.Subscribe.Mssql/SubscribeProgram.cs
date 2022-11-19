@@ -8,7 +8,7 @@ namespace Kogel.Subscribe.Mssql
     /// <summary>
     /// 
     /// </summary>
-    public class Program
+    public class SubscribeProgram
     {
         /// <summary>
         /// 
@@ -17,6 +17,7 @@ namespace Kogel.Subscribe.Mssql
 
         /// <summary>
         /// 运行所有订阅监听
+        /// 使用CDC需要开启Agent，/opt/mssql/bin/mssql-conf set sqlagent.enabled true
         /// </summary>
         /// <param name="assemblyList"></param>
         public static void Run(List<Assembly> assemblyList = null)
@@ -38,7 +39,7 @@ namespace Kogel.Subscribe.Mssql
                 foreach (var classImpl in assembly.GetTypes())
                 {
                     //判断是否继承过CcSubscribe
-                    if (classImpl.GetTypeInfo().IsAssignableToGenericType(subscribeTypeInfo))
+                    if (IsAssignableToGenericType(classImpl.GetTypeInfo(), subscribeTypeInfo))
                     {
                         //只要继承过都需要启动
                         var impl = Activator.CreateInstance(classImpl) as ISubscribe<object>;
@@ -51,7 +52,28 @@ namespace Kogel.Subscribe.Mssql
             }
         }
 
-        ~Program()
+        /// <summary>
+        /// 比对验证开放的泛型
+        /// </summary>
+        /// <param name="givenType"></param>
+        /// <param name="genericType"></param>
+        /// <returns></returns>
+        public static bool IsAssignableToGenericType(Type givenType, Type genericType)
+        {
+            var interfaceTypes = givenType.GetInterfaces();
+            foreach (var it in interfaceTypes)
+            {
+                if (it.IsGenericType && it.GetGenericTypeDefinition() == genericType)
+                    return true;
+            }
+            if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
+                return true;
+            Type baseType = givenType.BaseType;
+            if (baseType == null) return false;
+            return IsAssignableToGenericType(baseType, genericType);
+        }
+
+        ~SubscribeProgram()
         {
             _subscribes?.ForEach(x => x?.Dispose());
         }

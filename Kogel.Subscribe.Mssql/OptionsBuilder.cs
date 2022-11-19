@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Kogel.Subscribe.Mssql.Entites;
 using Kogel.Subscribe.Mssql.Entites.Enum;
 using Nest;
 using RabbitMQ.Client;
@@ -17,14 +18,9 @@ namespace Kogel.Subscribe.Mssql
         internal string ConnectionString { get; private set; }
 
         /// <summary>
-        /// 扫描间隔(每次扫描变更表的间隔，单位毫秒) 默认5000毫秒/5秒
+        /// Cdc监听设置
         /// </summary>
-        internal int? ScanInterval { get; private set; }
-
-        /// <summary>
-        /// 变更捕捉文件在DB保存的时间（默认三天）
-        /// </summary>
-        internal int Retention { get; private set; } = 60 * 24 * 3;
+        internal CdcConfig CdcConfig { get; private set; } = new CdcConfig();
 
         /// <summary>
         /// 使用哪种第三方中间件
@@ -42,7 +38,7 @@ namespace Kogel.Subscribe.Mssql
         internal ProducerConfig KafkaConfig { get; private set; }
 
         /// <summary>
-        /// 
+        /// RabbitMQ配置参数
         /// </summary>
         internal ConnectionFactory RabbitMQConfig { get; private set; }
 
@@ -50,21 +46,6 @@ namespace Kogel.Subscribe.Mssql
         /// 配置消息队列的topic（d当配置消息队列为rabbitmq时，此参数为配置交换机）
         /// </summary>
         internal string TopicName { get; private set; }
-
-        /// <summary>
-        /// 是否首次扫描全部
-        /// </summary>
-        internal bool IsFirstScanFull { get; set; } = false;
-
-        /// <summary>
-        /// 每次检索的变更量
-        /// </summary>
-        internal int Limit { get; set; } = 10;
-
-        /// <summary>
-        /// 是否异常中断（订阅消费过程中发生异常是否会影响后续增量捕捉）
-        /// </summary>
-        internal bool IsErrorInterrupt { get; set; } = true;
 
         /// <summary>
         /// 配置连接字符串
@@ -78,24 +59,13 @@ namespace Kogel.Subscribe.Mssql
         }
 
         /// <summary>
-        /// 配置扫描间隔(每次扫描变更表的间隔，单位毫秒) 默认5000毫秒/5秒
+        /// 配置Cdc监听设置
         /// </summary>
-        /// <param name="scanInterval"></param>
+        /// <param name="config"></param>
         /// <returns></returns>
-        public OptionsBuilder BuildScanInterval(int scanInterval = 5000)
+        public OptionsBuilder BuildCdcConfig(CdcConfig config)
         {
-            this.ScanInterval = scanInterval;
-            return this;
-        }
-
-        /// <summary>
-        /// 变更捕捉文件在DB保存的时间（默认三天）
-        /// </summary>
-        /// <param name="retention">分钟</param>
-        /// <returns></returns>
-        public OptionsBuilder BuildRetention(int retention = 4320)
-        {
-            this.Retention = retention;
+            this.CdcConfig = config;
             return this;
         }
 
@@ -106,7 +76,7 @@ namespace Kogel.Subscribe.Mssql
         /// <returns></returns>
         public OptionsBuilder BuildElasticsearch(ConnectionSettings config)
         {
-            this.MiddlewareTypeList.Add(MiddlewareEnum.Kafka);
+            this.MiddlewareTypeList.Add(MiddlewareEnum.Elasticsearch);
             this.ElasticsearchConfig = config;
             return this;
         }
@@ -143,39 +113,6 @@ namespace Kogel.Subscribe.Mssql
         public OptionsBuilder BuildTopic(string topicName)
         {
             this.TopicName = topicName;
-            return this;
-        }
-
-        /// <summary>
-        /// 配置是否首次扫描全部（默认不扫描）
-        /// </summary>
-        /// <param name="isFirstScanFull"></param>
-        /// <returns></returns>
-        public OptionsBuilder BuildFirstScanFull(bool isFirstScanFull = false)
-        {
-            this.IsFirstScanFull = isFirstScanFull;
-            return this;
-        }
-
-        /// <summary>
-        /// 每次检索的变更最大条数（同时也是每次写到队列的数据最大条数，建议5-20条）默认10条
-        /// </summary>
-        /// <param name="limit"></param>
-        /// <returns></returns>
-        public OptionsBuilder BuildLimit(int limit = 10)
-        {
-            this.Limit = limit;
-            return this;
-        }
-
-        /// <summary>
-        /// 配置是否异常中断（订阅消费过程中发生异常是否会影响后续增量捕捉）
-        /// </summary>
-        /// <param name="isErrorInterrupt"></param>
-        /// <returns></returns>
-        public OptionsBuilder BuildErrorInterrupt(bool isErrorInterrupt = true)
-        {
-            this.IsErrorInterrupt = isErrorInterrupt;
             return this;
         }
     }

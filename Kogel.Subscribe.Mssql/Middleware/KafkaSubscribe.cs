@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Confluent.Kafka;
 using Newtonsoft.Json;
+using Kogel.Dapper.Extension;
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
@@ -30,7 +31,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         {
             using (var producer = new ProducerBuilder<Null, string>(_options.KafkaConfig).Build())
             {
-                producer.Produce(_options.TopicName, new Message<Null, string>()
+                producer.Produce(_options.TopicName ?? $"kogel_subscribe_{EntityCache.QueryEntity(typeof(T)).Name}", new Message<Null, string>()
                 {
                     Value = JsonConvert.SerializeObject(messageList)
                 }, (result) =>

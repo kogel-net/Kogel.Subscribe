@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
+using Kogel.Dapper.Extension;
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
@@ -9,7 +10,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
     /// rabbitmq订阅，推送到rabbitmq队列中
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RabbitmqSubscribe<T> : MiddlewareSubscribe<T>
+    public class RabbitMQSubscribe<T> : MiddlewareSubscribe<T>
          where T : class
     {
         /// <summary>
@@ -17,7 +18,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         private readonly OptionsBuilder _options;
 
-        public RabbitmqSubscribe(OptionsBuilder options) : base(options)
+        public RabbitMQSubscribe(OptionsBuilder options) : base(options)
         {
             this._options = options;
         }
@@ -33,8 +34,9 @@ namespace Kogel.Subscribe.Mssql.Middleware
                 using (var channel = connection.CreateModel())
                 {
                     //发送消息
+                    string exchange = _options.TopicName ?? $"kogel_subscribe_{EntityCache.QueryEntity(typeof(T)).Name}";
                     var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageList));
-                    channel.BasicPublish(exchange: _options.TopicName, mandatory: false, routingKey: "", basicProperties: null, body: body);
+                    channel.BasicPublish(exchange: exchange, mandatory: false, routingKey: "", basicProperties: null, body: body);
                 }
             }
         }
