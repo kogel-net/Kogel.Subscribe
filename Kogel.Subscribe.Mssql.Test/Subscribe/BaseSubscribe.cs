@@ -26,6 +26,10 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
                    //    Acks = Acks.None
                    //})
                    .BuildElasticsearch(new Nest.ConnectionSettings(new Uri("http://192.168.159.128:9200/")))
+                   .BuildCdcConfig(new CdcConfig
+                   {
+                       IsFirstScanFull = true
+                   })
                    ;
         }
 

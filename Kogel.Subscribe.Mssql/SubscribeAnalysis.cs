@@ -187,7 +187,9 @@ namespace Kogel.Subscribe.Mssql
             }
         }
 
-        //末尾id
+        //当前扫描的末尾id
+        private long _currLastId = 0;
+        //最终扫描的末尾id
         private long _lastId = 0;
         /// <summary>
         /// 首次扫描全表
@@ -198,15 +200,25 @@ namespace Kogel.Subscribe.Mssql
             List<CT<T>> tableList = default;
             if (_options.CdcConfig.IsFirstScanFull)
             {
-#if DEBUG
-                if (_lastId == 0)
-                    Console.WriteLine($"开始扫描表{GetTableName()}的全部信息");
-#endif
                 //获取主键属性
                 var (idName, idProperty) = GetIdentity();
+
+                if (_currLastId == 0)
+                {
+                    var _last = _repoistory.QuerySet()
+                         .OrderBy($" {idName} DESC ")
+                         .Get();
+                    if (!(_last is null))
+                    {
+                        _lastId = Convert.ToInt64(idProperty.GetValue(_last));
+                    }
+#if DEBUG
+                    Console.WriteLine($"开始扫描表{GetTableName()}的全部信息");
+#endif
+                }
                 //扫描全表数据
                 tableList = _repoistory.QuerySet()
-                      .Where($"[{idName}] > {_lastId}")
+                      .Where($"[{idName}] BETWEEN {_currLastId} AND {_lastId}")
                       .OrderBy($" {idName} ASC ")
                       .Page(1, _options.CdcConfig.Limit)
                       .Select(x => new CT<T>
@@ -217,7 +229,7 @@ namespace Kogel.Subscribe.Mssql
                       }).ToList();
                 if (tableList.Any())
                 {
-                    _lastId = Convert.ToInt64(idProperty.GetValue(tableList.LastOrDefault().Result));
+                    _currLastId = Convert.ToInt64(idProperty.GetValue(tableList.LastOrDefault().Result));
                 }
                 //表示扫描完成
                 if (tableList.Count < _options.CdcConfig.Limit)
