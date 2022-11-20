@@ -10,15 +10,14 @@ namespace Kogel.Subscribe.Mssql.Middleware
     /// <summary>
     /// kafka订阅，推送到kafka队列中
     /// </summary>
-    public class KafkaSubscribe<T> : MiddlewareSubscribe<T>
+    public class KafkaSubscribe<T> : ISubscribe<T>
         where T : class
     {
         /// <summary>
         /// 
         /// </summary>
         private readonly OptionsBuilder _options;
-
-        public KafkaSubscribe(OptionsBuilder options) : base(options)
+        public KafkaSubscribe(OptionsBuilder options)
         {
             this._options = options;
         }
@@ -27,7 +26,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// 订阅消息并推送到kafka中
         /// </summary>
         /// <param name="messageList"></param>
-        public override void Subscribes(List<SubscribeMessage<T>> messageList)
+        public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
             using (var producer = new ProducerBuilder<Null, string>(_options.KafkaConfig).Build())
             {
@@ -44,7 +43,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        public override void Dispose()
+        public void Dispose()
         {
         }
     }

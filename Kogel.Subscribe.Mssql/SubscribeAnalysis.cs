@@ -352,7 +352,6 @@ namespace Kogel.Subscribe.Mssql
         /// <summary>
         /// 转换成CT<T>泛型数据
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="dataSet"></param>
         /// <returns></returns>
         public static List<CT<T>> ToCT(DataSet dataSet)
@@ -391,7 +390,6 @@ namespace Kogel.Subscribe.Mssql
             }
             return ctList;
         }
-
 
         /// <summary>
         /// 

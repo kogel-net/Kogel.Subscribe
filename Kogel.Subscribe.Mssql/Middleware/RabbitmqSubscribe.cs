@@ -10,15 +10,14 @@ namespace Kogel.Subscribe.Mssql.Middleware
     /// rabbitmq订阅，推送到rabbitmq队列中
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RabbitMQSubscribe<T> : MiddlewareSubscribe<T>
+    public class RabbitMQSubscribe<T> : ISubscribe<T>
          where T : class
     {
         /// <summary>
         /// 
         /// </summary>
         private readonly OptionsBuilder _options;
-
-        public RabbitMQSubscribe(OptionsBuilder options) : base(options)
+        public RabbitMQSubscribe(OptionsBuilder options)
         {
             this._options = options;
         }
@@ -27,7 +26,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// 订阅消息并推送到rabbitmq中
         /// </summary>
         /// <param name="messageList"></param>
-        public override void Subscribes(List<SubscribeMessage<T>> messageList)
+        public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
             using (var connection = _options.RabbitMQConfig.CreateConnection())
             {
@@ -44,7 +43,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        public override void Dispose()
+        public void Dispose()
         {
         }
     }

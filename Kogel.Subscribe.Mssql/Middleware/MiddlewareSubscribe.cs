@@ -10,7 +10,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
     /// <summary>
     /// 
     /// </summary>
-    public class MiddlewareSubscribe<T> : ISubscribe<T>, IDisposable
+    public class MiddlewareSubscribe<T> : ISubscribe<T>
         where T : class
     {
         /// <summary>
@@ -36,19 +36,23 @@ namespace Kogel.Subscribe.Mssql.Middleware
             this._queueSubscribeList = new List<ISubscribe<T>>();
             if (_options.MiddlewareTypeList.Any())
             {
-                if (_options.MiddlewareTypeList.Contains(MiddlewareEnum.Elasticsearch))
+                foreach (var middlewareType in _options.MiddlewareTypeList.Distinct())
                 {
-                    var queueSubscribe = new ElasticsearchSubscribe<T>(_options);
-                    _queueSubscribeList.Add(queueSubscribe);
-                }
-                if (_options.MiddlewareTypeList.Contains(MiddlewareEnum.Kafka))
-                {
-                    var queueSubscribe = new KafkaSubscribe<T>(_options);
-                    _queueSubscribeList.Add(queueSubscribe);
-                }
-                if (_options.MiddlewareTypeList.Contains(MiddlewareEnum.RabbitMQ))
-                {
-                    var queueSubscribe = new RabbitMQSubscribe<T>(_options);
+                    ISubscribe<T> queueSubscribe;
+                    switch (middlewareType)
+                    {
+                        case MiddlewareEnum.Elasticsearch:
+                            queueSubscribe = new ElasticsearchSubscribe<T>(_options);
+                            break;
+                        case MiddlewareEnum.Kafka:
+                            queueSubscribe = new KafkaSubscribe<T>(_options);
+                            break;
+                        case MiddlewareEnum.RabbitMQ:
+                            queueSubscribe = new RabbitMQSubscribe<T>(_options);
+                            break;
+                        default:
+                            throw new Exception($"未实现的中间件订阅【{middlewareType}】");
+                    }
                     _queueSubscribeList.Add(queueSubscribe);
                 }
             }

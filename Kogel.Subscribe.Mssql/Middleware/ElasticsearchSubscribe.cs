@@ -14,7 +14,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
     /// Elasticsearch订阅
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ElasticsearchSubscribe<T> : MiddlewareSubscribe<T>
+    public class ElasticsearchSubscribe<T> : ISubscribe<T>
         where T : class
     {
         /// <summary>
@@ -27,7 +27,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         private readonly ElasticClient _client;
 
-        public ElasticsearchSubscribe(OptionsBuilder options) : base(options)
+        public ElasticsearchSubscribe(OptionsBuilder options)
         {
             this._options = options;
             var settings = _options.ElasticsearchConfig.DefaultIndex(GetIndexName());
@@ -40,7 +40,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// 
         /// </summary>
         /// <param name="messageList"></param>
-        public override void Subscribes(List<SubscribeMessage<T>> messageList)
+        public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
             if (_isFirstSubscribe)
             {
@@ -236,7 +236,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        public override void Dispose()
+        public void Dispose()
         {
         }
     }
