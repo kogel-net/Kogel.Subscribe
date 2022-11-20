@@ -36,7 +36,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
             this._queueSubscribeList = new List<ISubscribe<T>>();
             if (_options.MiddlewareTypeList.Any())
             {
-                foreach (var middlewareType in _options.MiddlewareTypeList.Distinct())
+                foreach (var middlewareType in _options.MiddlewareTypeList)
                 {
                     ISubscribe<T> queueSubscribe;
                     switch (middlewareType)
