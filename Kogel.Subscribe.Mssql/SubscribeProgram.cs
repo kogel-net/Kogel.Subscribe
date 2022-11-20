@@ -39,7 +39,7 @@ namespace Kogel.Subscribe.Mssql
                 foreach (var classImpl in assembly.GetTypes())
                 {
                     //判断是否继承过CcSubscribe
-                    if (IsAssignableToGenericType(classImpl.GetTypeInfo(), subscribeTypeInfo))
+                    if (!classImpl.Attributes.HasFlag(TypeAttributes.Abstract) && IsAssignableToGenericType(classImpl.GetTypeInfo(), subscribeTypeInfo))
                     {
                         //只要继承过都需要启动
                         var impl = Activator.CreateInstance(classImpl) as ISubscribe<object>;

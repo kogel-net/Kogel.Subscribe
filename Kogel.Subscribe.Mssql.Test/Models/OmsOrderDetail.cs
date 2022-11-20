@@ -26,7 +26,7 @@ namespace Kogel.Subscribe.Mssql.Test.Models
         /// 
         /// </summary>
         [Display(Rename = "name")]
-        [Nest.PropertyName("id")]
+        [Nest.PropertyName("name")]
         public string Name { get; set; }
 
         /// <summary>

@@ -147,6 +147,11 @@ namespace Kogel.Subscribe.Mssql.Middleware
                                     if (!propertyInfo.CanWrite)
                                         continue;
 
+                                    //获取字段信息
+                                    var (ignore, fieldName) = GetField(propertyInfo);
+                                    if (ignore)
+                                        continue;
+
                                     string propertyTypeName = propertyInfo.PropertyType.Name;
                                     //可能是可空类型
                                     if (propertyInfo.PropertyType.FullName.Contains("System.Nullable") && propertyInfo.PropertyType.GenericTypeArguments != null && propertyInfo.PropertyType.GenericTypeArguments.Count() != 0)
@@ -164,23 +169,23 @@ namespace Kogel.Subscribe.Mssql.Middleware
                                         case nameof(Single):
                                         case nameof(Double):
                                         case nameof(Byte):
-                                            propertiesSelector = propertiesSelector.Number(propertyDescriptor => propertyDescriptor.Name(propertyInfo.Name));
+                                            propertiesSelector = propertiesSelector.Number(propertyDescriptor => propertyDescriptor.Name(fieldName));
                                             break;
 
                                         case nameof(Boolean):
-                                            propertiesSelector = propertiesSelector.Boolean(propertyDescriptor => propertyDescriptor.Name(propertyInfo.Name));
+                                            propertiesSelector = propertiesSelector.Boolean(propertyDescriptor => propertyDescriptor.Name(fieldName));
                                             break;
 
                                         case nameof(DateTime):
-                                            propertiesSelector = propertiesSelector.Date(propertyDescriptor => propertyDescriptor.Name(propertyInfo.Name));
+                                            propertiesSelector = propertiesSelector.Date(propertyDescriptor => propertyDescriptor.Name(fieldName));
                                             break;
 
                                         case nameof(String):
-                                            propertiesSelector = propertiesSelector.Keyword(propertyDescriptor => propertyDescriptor.Name(propertyInfo.Name));
+                                            propertiesSelector = propertiesSelector.Keyword(propertyDescriptor => propertyDescriptor.Name(fieldName));
                                             break;
 
                                         default:
-                                            break;
+                                            throw new Exception($"未知的数据类型{propertyTypeName}，如果不是索引内的字段请用特性[PropertyName(Ignore = true)]忽略");
                                     }
                                 }
                                 return propertiesSelector;
@@ -188,9 +193,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
                         )
                     );
                 if (!response.IsValid)
-                {
                     throw new Exception($"创建索引失败:{response.OriginalException.Message}");
-                }
             }
         }
 
@@ -209,6 +212,25 @@ namespace Kogel.Subscribe.Mssql.Middleware
             if (!string.IsNullOrEmpty(elasticsearchType.Name))
                 return elasticsearchType.Name;
             return type.Name;
+        }
+
+        /// <summary>
+        ///  通过nest自带的特性得到字段信息
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        private (bool, string) GetField(PropertyInfo property)
+        {
+            bool ignore = true;
+            string fieldName = property.Name;
+            var propertyName = property.GetCustomAttribute<PropertyNameAttribute>();
+            if (!(propertyName is null))
+            {
+                ignore = propertyName.Ignore;
+                if (!string.IsNullOrEmpty(propertyName.Name))
+                    fieldName = propertyName.Name;
+            }
+            return (ignore, fieldName);
         }
 
         /// <summary>
