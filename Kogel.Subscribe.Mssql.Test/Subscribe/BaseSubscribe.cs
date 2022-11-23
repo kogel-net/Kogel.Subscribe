@@ -7,30 +7,30 @@ using System.Text;
 namespace Kogel.Subscribe.Mssql.Test.Subscribe
 {
     /// <summary>
-    /// 
+    /// 基础配置类需要定义成abstract
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class BaseSubscribe<T> : Subscribe<T>
         where T : class, IBaseEntity
     {
-        public override void OnConfiguring(OptionsBuilder builder)
+        public override void OnConfiguring(OptionsBuilder<T> builder)
         {
-            builder.BuildConnection("server=192.168.159.128;user id=sa;password=P@ssw0rd,;persistsecurityinfo=True;database=KogelTest")
-                   //builder.BuildConnection("server=172.18.44.111;user id=sa;password=p@ssw0rd;persistsecurityinfo=True;database=KogelTest")
-                   //.BuilderRabbitmq(new RabbitMQ.Client.ConnectionFactory
-                   //{           
-                   //})
-                   //.BuildKafka(new ProducerConfig
-                   //{
-                   //    BootstrapServers = "192.168.159.128:9092",
-                   //    Acks = Acks.None
-                   //})
-                   .BuildElasticsearch(new Nest.ConnectionSettings(new Uri("http://192.168.159.128:9200/")))
-                   .BuildCdcConfig(new CdcConfig
-                   {
-                       IsFirstScanFull = true
-                   })
-                   ;
+            //builder.BuildConnection("server=192.168.159.128;user id=sa;password=P@ssw0rd,;persistsecurityinfo=True;database=KogelTest")
+            builder.BuildConnection("server=172.18.44.111;user id=sa;password=p@ssw0rd;persistsecurityinfo=True;database=KogelTest")
+            //.BuilderRabbitmq(new RabbitMQ.Client.ConnectionFactory
+            //{           
+            //})
+            //.BuildKafka(new ProducerConfig
+            //{
+            //    BootstrapServers = "192.168.159.128:9092",
+            //    Acks = Acks.None
+            //})
+            //.BuildElasticsearch(new Nest.ConnectionSettings(new Uri("http://192.168.159.128:9200/")))
+            .BuildCdcConfig(new CdcConfig
+            {
+                IsFirstScanFull = true
+            })
+            ;
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
         {
             foreach (var message in messageList)
             {
-                Console.WriteLine($"执行动作:{message.Operation}，更新的id:{message.Result.GetId()}");
+                Console.WriteLine($"执行动作:{message.Operation}，更新的表:{message.TableName}，更新的id:{message.Result.GetId()}");
             }
         }
     }

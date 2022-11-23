@@ -8,7 +8,7 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
     /// <summary>
     /// 
     /// </summary>
-    public class OmsOrderDetailSubscribe : BaseSubscribe<OmsOrderDetail>
-    {
-    }
+    //public class OmsOrderDetailSubscribe : BaseSubscribe<OmsOrderDetail>
+    //{
+    //}
 }

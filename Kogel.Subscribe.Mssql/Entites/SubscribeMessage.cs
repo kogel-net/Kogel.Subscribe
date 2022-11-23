@@ -21,5 +21,27 @@ namespace Kogel.Subscribe.Mssql.Entites
         /// 用来存放表实体信息
         /// </summary>
         public T Result { get; set; }
+
+        /// <summary>
+        /// 表名
+        /// </summary>
+        public string TableName { get; internal set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="esIndexName"></param>
+        /// <returns></returns>
+        public EsSubscribeMessage<T> ToEsSubscribeMessage(string esIndexName)
+        {
+            return new EsSubscribeMessage<T>
+            {
+                Seqval = this.Seqval,
+                Operation = this.Operation,
+                Result = this.Result,
+                TableName = this.TableName,
+                EsIndexName = esIndexName
+            };
+        }
     }
 }

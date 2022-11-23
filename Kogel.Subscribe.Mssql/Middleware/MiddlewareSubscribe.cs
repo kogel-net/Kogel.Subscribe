@@ -16,13 +16,13 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        private readonly OptionsBuilder _options;
+        private readonly OptionsBuilder<T> _options;
 
         /// <summary>
         /// 
         /// </summary>
         private List<ISubscribe<T>> _queueSubscribeList;
-        public MiddlewareSubscribe(OptionsBuilder options)
+        public MiddlewareSubscribe(OptionsBuilder<T> options)
         {
             this._options = options;
         }
@@ -36,7 +36,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
             this._queueSubscribeList = new List<ISubscribe<T>>();
             if (_options.MiddlewareTypeList.Any())
             {
-                foreach (var middlewareType in _options.MiddlewareTypeList)
+                foreach (var middlewareType in _options.MiddlewareTypeList.Distinct())
                 {
                     ISubscribe<T> queueSubscribe;
                     switch (middlewareType)

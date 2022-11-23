@@ -9,19 +9,6 @@ namespace Kogel.Subscribe.Mssql.Entites
     [Display(Schema = "cdc")]
     public class CT<T>
     {
-        ///// <summary>
-        ///// 同一条SQL的操作__$start_lsn会是一致
-        ///// </summary>
-        //[Identity(IsIncrease = false)]
-        //[Display(Rename = "__$start_lsn")]
-        //public override string Id { get; set; }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //[Display(Rename = "__$end_lsn")]
-        //public string EndLsn { get; set; }
-
         /// <summary>
         /// 变更检索的唯一标识
         /// </summary>
@@ -39,18 +26,6 @@ namespace Kogel.Subscribe.Mssql.Entites
         /// </summary>
         [Display(IsField = false)]
         public T Result { get; set; }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //[Display(Rename = "__$update_mask")]
-        //public string UpdateMask { get; set; }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //[Display(Rename = "__$command_id")]
-        //public long CommandId { get; set; }
     }
 
 }

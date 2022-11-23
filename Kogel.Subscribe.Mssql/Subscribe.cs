@@ -1,5 +1,6 @@
 ﻿using Kogel.Subscribe.Mssql.Entites;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace Kogel.Subscribe.Mssql
@@ -10,45 +11,59 @@ namespace Kogel.Subscribe.Mssql
     public abstract class Subscribe<T> : ISubscribe<T>
         where T : class
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        private readonly SubscribeAnalysis<T> _analysis;
 
         /// <summary>
         /// 
         /// </summary>
-        private readonly OptionsBuilder _options;
+        private readonly OptionsBuilder<T> _options;
 
         /// <summary>
         /// 
         /// </summary>
-        private readonly Thread _analysisThread;
+        private readonly List<Thread> _analysisThreads;
 
         /// <summary>
         /// 订阅
         /// </summary>
         public Subscribe()
         {
-            _options = new OptionsBuilder();
+            _options = new OptionsBuilder<T>();
+            _analysisThreads = new List<Thread>();
             OnConfiguring(_options);
             //启动解析监听
-            _analysis = new SubscribeAnalysis<T>();
-            _analysisThread = new Thread(() =>
+            //单表
+            if (_options.Shards == null || !_options.Shards.Any())
             {
-                _analysis.Register(this, _options);
-            })
+                _analysisThreads.Add(new Thread(() =>
+                {
+                    var analysis = new SubscribeAnalysis<T>();
+                    analysis.Register(this, _options);
+                }));
+            }
+            else
             {
-                IsBackground = true
-            };
-            _analysisThread.Start();
+                //分表
+                foreach (var shardsTable in _options.Shards)
+                {
+                    _analysisThreads.Add(new Thread(() =>
+                    {
+                        var analysis = new SubscribeAnalysis<T>();
+                        analysis.Register(this, _options, shardsTable);
+                    }));
+                }
+            }
+            _analysisThreads.ForEach((thread) =>
+            {
+                thread.IsBackground = true;
+                thread.Start();
+            });
         }
 
         /// <summary>
         /// 配置
         /// </summary>
         /// <param name="builder"></param>
-        public abstract void OnConfiguring(OptionsBuilder builder);
+        public abstract void OnConfiguring(OptionsBuilder<T> builder);
 
         /// <summary>
         /// 订阅
@@ -63,8 +78,7 @@ namespace Kogel.Subscribe.Mssql
         /// </summary>
         public void Dispose()
         {
-            _analysis?.Dispose();
-            _analysisThread?.Abort();
+            _analysisThreads?.ForEach(thread => thread?.Abort());
         }
     }
 }

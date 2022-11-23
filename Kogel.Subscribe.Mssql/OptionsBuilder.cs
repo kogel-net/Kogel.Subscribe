@@ -10,7 +10,7 @@ namespace Kogel.Subscribe.Mssql
     /// <summary>
     /// 
     /// </summary>
-    public class OptionsBuilder
+    public class OptionsBuilder<T>
     {
         /// <summary>
         /// 连接字符串
@@ -23,6 +23,11 @@ namespace Kogel.Subscribe.Mssql
         internal CdcConfig CdcConfig { get; private set; } = new CdcConfig();
 
         /// <summary>
+        /// 表分片
+        /// </summary>
+        internal List<string> Shards { get; set; }
+
+        /// <summary>
         /// 使用哪种第三方中间件
         /// </summary>
         internal List<MiddlewareEnum> MiddlewareTypeList { get; private set; } = new List<MiddlewareEnum>();
@@ -30,7 +35,7 @@ namespace Kogel.Subscribe.Mssql
         /// <summary>
         /// Elasticsearch配置参数
         /// </summary>
-        internal ConnectionSettings ElasticsearchConfig { get; private set; }
+        internal ElasticsearchConfig<T> ElasticsearchConfig { get; private set; }
 
         /// <summary>
         /// Kafka配置参数
@@ -52,7 +57,7 @@ namespace Kogel.Subscribe.Mssql
         /// </summary>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        public OptionsBuilder BuildConnection(string connectionString)
+        public OptionsBuilder<T> BuildConnection(string connectionString)
         {
             this.ConnectionString = connectionString;
             return this;
@@ -63,9 +68,20 @@ namespace Kogel.Subscribe.Mssql
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public OptionsBuilder BuildCdcConfig(CdcConfig config)
+        public OptionsBuilder<T> BuildCdcConfig(CdcConfig config)
         {
             this.CdcConfig = config;
+            return this;
+        }
+
+        /// <summary>
+        /// 配置所有表分片
+        /// </summary>
+        /// <param name="shards">所有分表表名</param>
+        /// <returns></returns>
+        public OptionsBuilder<T> BuildShards(List<string> shards)
+        {
+            this.Shards = shards;
             return this;
         }
 
@@ -74,7 +90,7 @@ namespace Kogel.Subscribe.Mssql
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public OptionsBuilder BuildElasticsearch(ConnectionSettings config)
+        public OptionsBuilder<T> BuildElasticsearch(ElasticsearchConfig<T> config)
         {
             this.MiddlewareTypeList.Add(MiddlewareEnum.Elasticsearch);
             this.ElasticsearchConfig = config;
@@ -86,7 +102,7 @@ namespace Kogel.Subscribe.Mssql
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public OptionsBuilder BuildKafka(ProducerConfig config)
+        public OptionsBuilder<T> BuildKafka(ProducerConfig config)
         {
             this.MiddlewareTypeList.Add(MiddlewareEnum.Kafka);
             this.KafkaConfig = config;
@@ -98,7 +114,7 @@ namespace Kogel.Subscribe.Mssql
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public OptionsBuilder BuilderRabbitMQ(ConnectionFactory config)
+        public OptionsBuilder<T> BuilderRabbitMQ(ConnectionFactory config)
         {
             this.MiddlewareTypeList.Add(MiddlewareEnum.RabbitMQ);
             this.RabbitMQConfig = config;
@@ -110,7 +126,7 @@ namespace Kogel.Subscribe.Mssql
         /// </summary>
         /// <param name="topicName"></param>
         /// <returns></returns>
-        public OptionsBuilder BuildTopic(string topicName)
+        public OptionsBuilder<T> BuildTopic(string topicName)
         {
             this.TopicName = topicName;
             return this;

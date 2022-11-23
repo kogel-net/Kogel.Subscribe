@@ -1,7 +1,6 @@
 ﻿using Kogel.Dapper.Extension.Attributes;
 using System;
 using System.Data.SqlClient;
-using Kogel.Repository;
 using System.Collections.Generic;
 using Kogel.Subscribe.Mssql.Entites;
 using System.Linq;
@@ -11,6 +10,7 @@ using Kogel.Subscribe.Mssql.Test.Models;
 using Kogel.Dapper.Extension.MsSql.Extension;
 using Kogel.Dapper.Extension;
 using Kogel.Subscribe.Mssql.Entites.Enum;
+using System.Threading;
 
 namespace Kogel.Subscribe.Mssql.Test
 {

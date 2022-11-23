@@ -2,10 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Kogel.Repository;
 using System.Data.SqlClient;
 using Kogel.Dapper.Extension.MsSql;
-using Kogel.Repository.Interfaces;
 using System.Linq;
 using System.Data.Common;
 using System.Reflection;
@@ -36,7 +34,7 @@ namespace Kogel.Subscribe.Mssql
         /// <summary>
         /// 
         /// </summary>
-        private OptionsBuilder _options;
+        private OptionsBuilder<T> _options;
 
         /// <summary>
         /// 
@@ -44,19 +42,29 @@ namespace Kogel.Subscribe.Mssql
         private MiddlewareSubscribe<T> _middlewareSubscribe;
 
         /// <summary>
-        /// 
+        /// 分片表名
         /// </summary>
-        private IBaseRepository<T> _repoistory;
+        private string _shardsTable;
+
+        private IDbConnection _conn;
+        private IDbConnection GetConnection()
+        {
+            if (_conn == null)
+                _conn = new SqlConnection(_options.ConnectionString);
+            return _conn;
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="handler"></param>
         /// <param name="options"></param>
+        /// <param name="shardsIndex"></param>
         /// <returns></returns>
-        internal SubscribeAnalysis<T> Register(ISubscribe<T> handler, OptionsBuilder options)
+        internal SubscribeAnalysis<T> Register(ISubscribe<T> handler, OptionsBuilder<T> options, string shardsTable = null)
         {
             this._options = options;
+            this._shardsTable = shardsTable;
             EventBus += new SubscribeHandler(handler.Subscribes);
 
             //注册中间件
@@ -120,7 +128,8 @@ namespace Kogel.Subscribe.Mssql
                              {
                                  Seqval = x.Seqval,
                                  Operation = x.Operation != CTOperationEnum.UPDATED ? (OperationEnum)(int)x.Operation : OperationEnum.UPDATE,
-                                 Result = x.Result
+                                 Result = x.Result,
+                                 TableName = GetTableName()
                              })
                              .ToList();
         }
@@ -130,15 +139,15 @@ namespace Kogel.Subscribe.Mssql
         private static bool _isCodeFirst = true;
         private static readonly object _checkFirstLock = new object();
 
+        private bool _isAnalysisFirst = true;
         /// <summary>
         /// 首次进入确认
         /// </summary>
         private void CheckFirst()
         {
-            if (_repoistory is null)
+            if (_isAnalysisFirst)
             {
-                RepositoryOptionsBuilder.RegisterDataBase(x => new SqlConnection(_options.ConnectionString), "master");
-                _repoistory = new SqlConnection(_options.ConnectionString).QuerySet<T>().GetRepository();
+                _isAnalysisFirst = false;
                 //检测CDC设置
                 lock (_checkFirstLock)
                 {
@@ -147,20 +156,20 @@ namespace Kogel.Subscribe.Mssql
                     if (_isCodeFirst)
                     {
                         //检查是否开启了CDC
-                        isCdcEnabled = _repoistory.Orm.QueryFirstOrDefault<bool>($"SELECT is_cdc_enabled FROM sys.databases WHERE [NAME] = '{database}'");
+                        isCdcEnabled = GetConnection().QueryFirstOrDefault<bool>($"SELECT is_cdc_enabled FROM sys.databases WHERE [NAME] = '{database}'");
                         if (!isCdcEnabled)
                         {
                             //首次进入需要开启CNC
-                            _repoistory.Orm.Execute($"alter database {database} set allow_snapshot_isolation on");
+                            GetConnection().Execute($"alter database {database} set allow_snapshot_isolation on");
                             //启动cdc监听作业
-                            _repoistory.Orm.Execute("exec sys.sp_cdc_enable_db");
+                            GetConnection().Execute("exec sys.sp_cdc_enable_db");
                         }
                     }
                     //判断表是否开启过cdc
                     if (!IsExsitsCdc())
                     {
                         //表开启cdc
-                        _repoistory.Orm.Execute($@"exec sys.sp_cdc_enable_table
+                        GetConnection().Execute($@"exec sys.sp_cdc_enable_table
                                                 @source_schema = N'{GetSchema()}', 
 	                                            @source_name = N'{GetTableName()}',
 	                                            @role_name = null");
@@ -169,7 +178,7 @@ namespace Kogel.Subscribe.Mssql
                     {
                         //检查最新的变更
                         if (_options.CdcConfig.OffsetPosition == OffsetPositionEnum.Last)
-                            _lastSeqval = _repoistory.Orm.QueryFirstOrDefault<string>($"SELECT TOP 1 convert(varchar(50), [__$seqval], 1) FROM {GetCtTableName()} order by __$seqval desc") ?? "0";
+                            _lastSeqval = GetConnection().QueryFirstOrDefault<string>($"SELECT TOP 1 convert(varchar(50), [__$seqval], 1) FROM {GetCtTableName()} order by __$seqval desc") ?? "0";
                     }
                     if (_isCodeFirst)
                     {
@@ -177,7 +186,7 @@ namespace Kogel.Subscribe.Mssql
                         if (!isCdcEnabled)
                         {
                             //必须在表开启后才能执行清楚计划
-                            _repoistory.Orm.Execute($@"exec sys.sp_cdc_change_job
+                            GetConnection().Execute($@"exec sys.sp_cdc_change_job
                                                 @job_type = 'cleanup',
                                                 @retention = {_options.CdcConfig.Retention},
                                                 @threshold = 5000");
@@ -205,7 +214,8 @@ namespace Kogel.Subscribe.Mssql
 
                 if (_currLastId == 0)
                 {
-                    var _last = _repoistory.QuerySet()
+                    var _last = GetConnection().QuerySet<T>()
+                         .ResetTableName(typeof(T), GetTableName())
                          .OrderBy($" {idName} DESC ")
                          .Get();
                     if (!(_last is null))
@@ -217,7 +227,8 @@ namespace Kogel.Subscribe.Mssql
 #endif
                 }
                 //扫描全表数据
-                tableList = _repoistory.QuerySet()
+                tableList = GetConnection().QuerySet<T>()
+                      .ResetTableName(typeof(T), GetTableName())
                       .Where($"[{idName}] BETWEEN {_currLastId} AND {_lastId}")
                       .OrderBy($" {idName} ASC ")
                       .Page(1, _options.CdcConfig.Limit)
@@ -284,7 +295,7 @@ namespace Kogel.Subscribe.Mssql
                                         WHERE [__$seqval] > {_lastSeqval}
 									    ) T
 								    WHERE T.[row] BETWEEN 1 AND {_options.CdcConfig.Limit}";
-            var changeData = ToCT(_repoistory.Orm.QueryDataSet(new SqlDataAdapter(), execSql));
+            var changeData = ToCT(GetConnection().QueryDataSet(new SqlDataAdapter(), execSql));
             //记录本次seq
             if (changeData != null && changeData.Any())
                 _lastSeqval = changeData.LastOrDefault().Seqval;
@@ -297,7 +308,7 @@ namespace Kogel.Subscribe.Mssql
         /// <returns></returns>
         private bool IsExsitsCdc()
         {
-            var result = _repoistory.Orm.QueryFirst<int>($"SELECT TOP 1 is_tracked_by_cdc FROM sys.tables where [name] ='{GetTableName()}'");
+            var result = GetConnection().QueryFirst<int>($"SELECT TOP 1 is_tracked_by_cdc FROM sys.tables where [name] ='{GetTableName()}'");
             return result > 0;
         }
 
@@ -316,8 +327,9 @@ namespace Kogel.Subscribe.Mssql
         /// <returns></returns>
         private string GetTableName()
         {
-            var entity = EntityCache.QueryEntity(typeof(T));
-            return entity.Name;
+            if (!string.IsNullOrEmpty(_shardsTable))
+                return _shardsTable;
+            return EntityCache.QueryEntity(typeof(T)).Name;
         }
 
         /// <summary>
@@ -345,7 +357,7 @@ namespace Kogel.Subscribe.Mssql
         /// <returns></returns>
         private string GetDataBase()
         {
-            var dbConnection = _repoistory.Orm as DbConnection;
+            var dbConnection = GetConnection() as DbConnection;
             return dbConnection?.Database;
         }
 
@@ -396,7 +408,7 @@ namespace Kogel.Subscribe.Mssql
         /// </summary>
         public void Dispose()
         {
-            _repoistory?.Dispose();
+            _conn?.Dispose();
             _middlewareSubscribe?.Dispose();
         }
     }

@@ -16,8 +16,8 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        private readonly OptionsBuilder _options;
-        public RabbitMQSubscribe(OptionsBuilder options)
+        private readonly OptionsBuilder<T> _options;
+        public RabbitMQSubscribe(OptionsBuilder<T> options)
         {
             this._options = options;
         }
