@@ -8,7 +8,7 @@ namespace Kogel.Subscribe.Mssql
     /// <summary>
     /// 
     /// </summary>
-    public class SubscribeProgram
+    public class ApplicationProgram
     {
         /// <summary>
         /// 
@@ -73,9 +73,14 @@ namespace Kogel.Subscribe.Mssql
             return IsAssignableToGenericType(baseType, genericType);
         }
 
-        ~SubscribeProgram()
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Close()
         {
             _subscribes?.ForEach(x => x?.Dispose());
         }
+
+        ~ApplicationProgram() => Close();
     }
 }

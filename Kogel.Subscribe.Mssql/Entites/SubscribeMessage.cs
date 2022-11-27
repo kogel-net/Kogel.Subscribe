@@ -8,19 +8,19 @@ namespace Kogel.Subscribe.Mssql.Entites
     public class SubscribeMessage<T>
     {
         /// <summary>
-        /// 
+        /// 变更序列号
         /// </summary>
-        public string Seqval { get; set; }
+        public string Seqval { get; internal set; }
 
         /// <summary>
-        /// 更新前和更新后的同一次操作Seqval会是一致
+        /// 操作动作
         /// </summary>
-        public OperationEnum Operation { get; set; }
+        public OperationEnum Operation { get; internal set; }
 
         /// <summary>
         /// 用来存放表实体信息
         /// </summary>
-        public T Result { get; set; }
+        public T Result { get; internal set; }
 
         /// <summary>
         /// 表名

@@ -16,10 +16,10 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        private readonly OptionsBuilder<T> _options;
-        public RabbitMQSubscribe(OptionsBuilder<T> options)
+        private readonly SubscribeContext<T> _context;
+        public RabbitMQSubscribe(SubscribeContext<T> context)
         {
-            this._options = options;
+            this._context = context;
         }
 
         /// <summary>
@@ -28,12 +28,12 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <param name="messageList"></param>
         public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
-            using (var connection = _options.RabbitMQConfig.CreateConnection())
+            using (var connection = _context._options.RabbitMQConfig.CreateConnection())
             {
                 using (var channel = connection.CreateModel())
                 {
                     //发送消息
-                    string exchange = _options.TopicName ?? $"kogel_subscribe_{EntityCache.QueryEntity(typeof(T)).Name}";
+                    string exchange = _context._options.TopicName ?? $"kogel_subscribe_{_context._tableName}";
                     var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageList));
                     channel.BasicPublish(exchange: exchange, mandatory: false, routingKey: "", basicProperties: null, body: body);
                 }

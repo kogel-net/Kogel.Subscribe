@@ -4,6 +4,7 @@ using Kogel.Subscribe.Mssql.Entites.Enum;
 using Nest;
 using RabbitMQ.Client;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Kogel.Subscribe.Mssql
 {
@@ -130,6 +131,39 @@ namespace Kogel.Subscribe.Mssql
         {
             this.TopicName = topicName;
             return this;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class SubscribeContext<T>
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public readonly OptionsBuilder<T> _options;
+
+        /// <summary>
+        /// 表名
+        /// </summary>
+        public readonly string _tableName;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal StreamWriter LogWriter { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="tableName"></param>
+        public SubscribeContext(OptionsBuilder<T> options,string tableName)
+        {
+            this._options = options;
+            this._tableName = tableName;
         }
     }
 }

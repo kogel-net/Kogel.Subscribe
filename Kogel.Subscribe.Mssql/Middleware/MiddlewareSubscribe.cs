@@ -8,23 +8,25 @@ using System.Text;
 namespace Kogel.Subscribe.Mssql.Middleware
 {
     /// <summary>
-    /// 
+    /// 中间件订阅中心
     /// </summary>
-    public class MiddlewareSubscribe<T> : ISubscribe<T>
+    public sealed class MiddlewareSubscribe<T> : ISubscribe<T>
         where T : class
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        private readonly OptionsBuilder<T> _options;
 
         /// <summary>
         /// 
         /// </summary>
         private List<ISubscribe<T>> _queueSubscribeList;
-        public MiddlewareSubscribe(OptionsBuilder<T> options)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly SubscribeContext<T> _context;
+
+        public MiddlewareSubscribe(SubscribeContext<T> context)
         {
-            this._options = options;
+            this._context = context;
         }
 
         /// <summary>
@@ -33,22 +35,27 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <returns></returns>
         public MiddlewareSubscribe<T> Register()
         {
-            this._queueSubscribeList = new List<ISubscribe<T>>();
-            if (_options.MiddlewareTypeList.Any())
+            this._queueSubscribeList = new List<ISubscribe<T>> 
             {
-                foreach (var middlewareType in _options.MiddlewareTypeList.Distinct())
+                   //注册日志
+                new LogSubscribe<T>(_context)
+            };
+            //注册选择的中间件
+            if (_context._options.MiddlewareTypeList.Any())
+            {
+                foreach (var middlewareType in _context._options.MiddlewareTypeList.Distinct())
                 {
                     ISubscribe<T> queueSubscribe;
                     switch (middlewareType)
                     {
                         case MiddlewareEnum.Elasticsearch:
-                            queueSubscribe = new ElasticsearchSubscribe<T>(_options);
+                            queueSubscribe = new ElasticsearchSubscribe<T>(_context);
                             break;
                         case MiddlewareEnum.Kafka:
-                            queueSubscribe = new KafkaSubscribe<T>(_options);
+                            queueSubscribe = new KafkaSubscribe<T>(_context);
                             break;
                         case MiddlewareEnum.RabbitMQ:
-                            queueSubscribe = new RabbitMQSubscribe<T>(_options);
+                            queueSubscribe = new RabbitMQSubscribe<T>(_context);
                             break;
                         default:
                             throw new Exception($"未实现的中间件订阅【{middlewareType}】");
@@ -63,7 +70,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// 
         /// </summary>
         /// <param name="messageList"></param>
-        public virtual void Subscribes(List<SubscribeMessage<T>> messageList)
+        public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
             this._queueSubscribeList?.ForEach(x => x?.Subscribes(messageList));
         }
@@ -71,7 +78,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        public virtual void Dispose()
+        public void Dispose()
         {
             this._queueSubscribeList?.ForEach(x => x?.Dispose());
         }

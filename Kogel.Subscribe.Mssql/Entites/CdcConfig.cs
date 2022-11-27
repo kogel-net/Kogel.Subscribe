@@ -35,9 +35,9 @@ namespace Kogel.Subscribe.Mssql.Entites
         /// </summary>
         public OffsetPositionEnum OffsetPosition { get; set; } = OffsetPositionEnum.Zero;
 
-        /// <summary>
-        /// 是否异常中断（订阅消费过程中发生异常是否会影响后续增量捕捉，默认会影响）
-        /// </summary>
-        internal bool IsErrorInterrupt { get; set; } = true;
+        ///// <summary>
+        ///// 是否异常中断（订阅消费过程中发生异常是否会影响后续增量捕捉，默认会影响）
+        ///// </summary>
+        //internal bool IsErrorInterrupt { get; set; } = true;
     }
 }

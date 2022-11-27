@@ -21,7 +21,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        private readonly OptionsBuilder<T> _options;
+        private readonly SubscribeContext<T> _context;
 
         /// <summary>
         /// 
@@ -33,11 +33,11 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         private readonly Func<SubscribeMessage<T>, EsSubscribeMessage<T>> _funcWriteInterceptor;
 
-        public ElasticsearchSubscribe(OptionsBuilder<T> options)
+        public ElasticsearchSubscribe(SubscribeContext<T> context)
         {
-            this._options = options;
+            this._context = context;
             this._client = GetClient();
-            _funcWriteInterceptor = _options.ElasticsearchConfig?.WriteInterceptor?.Compile();
+            _funcWriteInterceptor = _context._options.ElasticsearchConfig?.WriteInterceptor?.Compile();
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <returns></returns>
         private ElasticClient GetClient(string esIndexName = null)
         {
-            var settings = _options.ElasticsearchConfig.Settings.DefaultIndex(esIndexName ?? GetIndexName());
+            var settings = _context._options.ElasticsearchConfig.Settings.DefaultIndex(esIndexName ?? GetIndexName());
             return new ElasticClient(settings);
         }
 

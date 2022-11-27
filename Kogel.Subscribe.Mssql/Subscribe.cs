@@ -36,7 +36,7 @@ namespace Kogel.Subscribe.Mssql
             {
                 _analysisThreads.Add(new Thread(() =>
                 {
-                    var analysis = new SubscribeAnalysis<T>();
+                    var analysis = new HandleAnalysis<T>();
                     analysis.Register(this, _options);
                 }));
             }
@@ -47,7 +47,7 @@ namespace Kogel.Subscribe.Mssql
                 {
                     _analysisThreads.Add(new Thread(() =>
                     {
-                        var analysis = new SubscribeAnalysis<T>();
+                        var analysis = new HandleAnalysis<T>();
                         analysis.Register(this, _options, shardsTable);
                     }));
                 }

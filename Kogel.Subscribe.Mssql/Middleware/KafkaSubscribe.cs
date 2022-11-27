@@ -16,10 +16,10 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        private readonly OptionsBuilder<T> _options;
-        public KafkaSubscribe(OptionsBuilder<T> options)
+        private readonly SubscribeContext<T> _context;
+        public KafkaSubscribe(SubscribeContext<T> context)
         {
-            this._options = options;
+            this._context = context;
         }
 
         /// <summary>
@@ -28,9 +28,9 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <param name="messageList"></param>
         public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
-            using (var producer = new ProducerBuilder<Null, string>(_options.KafkaConfig).Build())
+            using (var producer = new ProducerBuilder<Null, string>(_context._options.KafkaConfig).Build())
             {
-                producer.Produce(_options.TopicName ?? $"kogel_subscribe_{EntityCache.QueryEntity(typeof(T)).Name}", new Message<Null, string>()
+                producer.Produce(_context._options.TopicName ?? $"kogel_subscribe_{_context._tableName}", new Message<Null, string>()
                 {
                     Value = JsonConvert.SerializeObject(messageList)
                 }, (result) =>
