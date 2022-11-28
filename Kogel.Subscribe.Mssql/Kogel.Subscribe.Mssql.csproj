@@ -2,6 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+	<PackageId>Kogel.Subscribe.Mssql</PackageId>
+	<PackageTags>SQL Server增量订阅</PackageTags>
+	<Title>SQL Server增量订阅</Title>
+	<Description>SQL Server增量订阅</Description>
+	<Authors>Kogel</Authors>
+	<Company>Kogel.Subscribe.Mssql</Company>
+	<Product>Kogel.Subscribe.Mssql</Product>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<Version>0.0.0.1</Version>
+	<ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
