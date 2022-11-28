@@ -15,8 +15,8 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
     {
         public override void OnConfiguring(OptionsBuilder<T> builder)
         {
-            builder.BuildConnection("server=192.168.159.128;user id=sa;password=P@ssw0rd,;persistsecurityinfo=True;database=KogelTest")
-            //builder.BuildConnection("server=172.18.44.111;user id=sa;password=p@ssw0rd;persistsecurityinfo=True;database=KogelTest")
+            //builder.BuildConnection("server=192.168.159.128;user id=sa;password=P@ssw0rd,;persistsecurityinfo=True;database=KogelTest")
+            builder.BuildConnection("server=172.18.44.111;user id=sa;password=p@ssw0rd;persistsecurityinfo=True;database=KogelTest")
             //.BuilderRabbitmq(new RabbitMQ.Client.ConnectionFactory
             //{           
             //})
@@ -26,10 +26,10 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
             //    Acks = Acks.None
             //})
             //.BuildElasticsearch(new Nest.ConnectionSettings(new Uri("http://192.168.159.128:9200/")))
-            .BuildCdcConfig(new CdcConfig
-            {
-                IsFirstScanFull = true
-            })
+            //.BuildCdcConfig(new CdcConfig
+            //{
+            //    IsFirstScanFull = false
+            //})
             ;
         }
 

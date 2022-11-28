@@ -3,7 +3,6 @@ using Kogel.Subscribe.Mssql.Entites.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
@@ -37,13 +36,12 @@ namespace Kogel.Subscribe.Mssql.Middleware
         {
             this._queueSubscribeList = new List<ISubscribe<T>> 
             {
-                   //注册日志
-                new LogSubscribe<T>(_context)
+                new VolumeSubscribe<T>(_context)
             };
             //注册选择的中间件
-            if (_context._options.MiddlewareTypeList.Any())
+            if (_context.Options.MiddlewareTypeList.Any())
             {
-                foreach (var middlewareType in _context._options.MiddlewareTypeList.Distinct())
+                foreach (var middlewareType in _context.Options.MiddlewareTypeList.Distinct())
                 {
                     ISubscribe<T> queueSubscribe;
                     switch (middlewareType)

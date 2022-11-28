@@ -33,7 +33,7 @@ namespace Kogel.Subscribe.Mssql.Entites
         /// <summary>
         /// 扫描的偏移量位置（默认从起点开始）
         /// </summary>
-        public OffsetPositionEnum OffsetPosition { get; set; } = OffsetPositionEnum.Zero;
+        public OffsetPositionEnum OffsetPosition { get; set; } = OffsetPositionEnum.Abort;
 
         ///// <summary>
         ///// 是否异常中断（订阅消费过程中发生异常是否会影响后续增量捕捉，默认会影响）

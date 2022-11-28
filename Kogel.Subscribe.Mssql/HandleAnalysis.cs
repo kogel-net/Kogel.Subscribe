@@ -24,12 +24,12 @@ namespace Kogel.Subscribe.Mssql
         /// 订阅通知
         /// </summary>
         /// <param name="messageList"></param>
-        public delegate void SubscribeHandler(List<SubscribeMessage<T>> messageList);
+        private delegate void SubscribeHandler(List<SubscribeMessage<T>> messageList);
 
         /// <summary>
         /// 事件总线
         /// </summary>
-        public event SubscribeHandler EventBus;
+        private event SubscribeHandler _eventBus;
 
         /// <summary>
         /// 上下文对象
@@ -42,10 +42,14 @@ namespace Kogel.Subscribe.Mssql
         private MiddlewareSubscribe<T> _middlewareSubscribe;
 
         private IDbConnection _conn;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private IDbConnection GetConnection()
         {
             if (_conn == null)
-                _conn = new SqlConnection(_context._options.ConnectionString);
+                _conn = new SqlConnection(_context.Options.ConnectionString);
             return _conn;
         }
 
@@ -63,10 +67,10 @@ namespace Kogel.Subscribe.Mssql
 
             //注册中间件
             this._middlewareSubscribe = new MiddlewareSubscribe<T>(_context).Register();
-            EventBus += new SubscribeHandler(_middlewareSubscribe.Subscribes);
+            _eventBus += new SubscribeHandler(_middlewareSubscribe.Subscribes);
 
             //自定义注册
-            EventBus += new SubscribeHandler(handler.Subscribes);
+            _eventBus += new SubscribeHandler(handler.Subscribes);
 
             //开始处理
             this.Handler();
@@ -90,21 +94,21 @@ namespace Kogel.Subscribe.Mssql
                 {
                     //表扫描完成
 #if DEBUG
-                    Console.WriteLine($"开始检查表{_context._tableName}变更");
+                    Console.WriteLine($"开始检查表{_context.TableName}变更");
 #endif
                     //检查变更
                     changeData = CheckChange();
 #if DEBUG
-                    Console.WriteLine($"检查到表{_context._tableName}变更{changeData?.Count}条");
+                    Console.WriteLine($"检查到表{_context.TableName}变更{changeData?.Count}条");
 #endif
                 }
                 if (changeData != null && changeData.Count > 0)
                 {
-                    EventBus?.Invoke(GetMessageList(changeData));
+                    _eventBus?.Invoke(GetMessageList(changeData));
                 }
                 else
                 {
-                    Thread.Sleep(_context._options.CdcConfig.ScanInterval);
+                    Thread.Sleep(_context.Options.CdcConfig.ScanInterval);
                 }
             }
         }
@@ -123,7 +127,7 @@ namespace Kogel.Subscribe.Mssql
                                  Seqval = x.Seqval,
                                  Operation = x.Operation != CTOperationEnum.UPDATED ? (OperationEnum)(int)x.Operation : OperationEnum.UPDATE,
                                  Result = x.Result,
-                                 TableName = _context._tableName
+                                 TableName = _context.TableName
                              })
                              .ToList();
         }
@@ -165,13 +169,15 @@ namespace Kogel.Subscribe.Mssql
                         //表开启cdc
                         GetConnection().Execute($@"exec sys.sp_cdc_enable_table
                                                 @source_schema = N'{GetSchema()}', 
-	                                            @source_name = N'{_context._tableName}',
+	                                            @source_name = N'{_context.TableName}',
 	                                            @role_name = null");
                     }
                     else
                     {
                         //检查最新的变更
-                        if (_context._options.CdcConfig.OffsetPosition == OffsetPositionEnum.Last)
+                        if (_context.Options.CdcConfig.OffsetPosition == OffsetPositionEnum.Abort)
+                            _lastSeqval = _context.VolumeFile.ReadSeqval() ?? "0";
+                        else if (_context.Options.CdcConfig.OffsetPosition == OffsetPositionEnum.Last)
                             _lastSeqval = GetConnection().QueryFirstOrDefault<string>($"SELECT TOP 1 convert(varchar(50), [__$seqval], 1) FROM {GetCtTableName()} order by __$seqval desc") ?? "0";
                     }
                     if (_isCodeFirst)
@@ -182,7 +188,7 @@ namespace Kogel.Subscribe.Mssql
                             //必须在表开启后才能执行清楚计划
                             GetConnection().Execute($@"exec sys.sp_cdc_change_job
                                                 @job_type = 'cleanup',
-                                                @retention = {_context._options.CdcConfig.Retention},
+                                                @retention = {_context.Options.CdcConfig.Retention},
                                                 @threshold = 5000");
                         }
                     }
@@ -201,7 +207,7 @@ namespace Kogel.Subscribe.Mssql
         private List<CT<T>> CheckFirstScanFull()
         {
             List<CT<T>> tableList = default;
-            if (_context._options.CdcConfig.IsFirstScanFull)
+            if (_context.Options.CdcConfig.IsFirstScanFull)
             {
                 //获取主键属性
                 var (idName, idProperty) = GetIdentity();
@@ -209,7 +215,7 @@ namespace Kogel.Subscribe.Mssql
                 if (_currLastId == 0)
                 {
                     var _last = GetConnection().QuerySet<T>()
-                         .ResetTableName(typeof(T), _context._tableName)
+                         .ResetTableName(typeof(T), _context.TableName)
                          .OrderBy($" {idName} DESC ")
                          .Get();
                     if (!(_last is null))
@@ -217,15 +223,15 @@ namespace Kogel.Subscribe.Mssql
                         _lastId = Convert.ToInt64(idProperty.GetValue(_last));
                     }
 #if DEBUG
-                    Console.WriteLine($"开始扫描表{_context._tableName}的全部信息");
+                    Console.WriteLine($"开始扫描表{_context.TableName}的全部信息");
 #endif
                 }
                 //扫描全表数据
                 tableList = GetConnection().QuerySet<T>()
-                      .ResetTableName(typeof(T), _context._tableName)
+                      .ResetTableName(typeof(T), _context.TableName)
                       .Where($"[{idName}] BETWEEN {_currLastId} AND {_lastId}")
                       .OrderBy($" {idName} ASC ")
-                      .Page(1, _context._options.CdcConfig.Limit)
+                      .Page(1, _context.Options.CdcConfig.Limit)
                       .Select(x => new CT<T>
                       {
                           Seqval = "0",
@@ -237,9 +243,9 @@ namespace Kogel.Subscribe.Mssql
                     _currLastId = Convert.ToInt64(idProperty.GetValue(tableList.LastOrDefault().Result));
                 }
                 //表示扫描完成
-                if (tableList.Count < _context._options.CdcConfig.Limit)
+                if (tableList.Count < _context.Options.CdcConfig.Limit)
                 {
-                    _context._options.CdcConfig.IsFirstScanFull = false;
+                    _context.Options.CdcConfig.IsFirstScanFull = false;
                 }
             }
             return tableList;
@@ -288,7 +294,7 @@ namespace Kogel.Subscribe.Mssql
                                         FROM {GetCtTableName()} 
                                         WHERE [__$seqval] > {_lastSeqval}
 									    ) T
-								    WHERE T.[row] BETWEEN 1 AND {_context._options.CdcConfig.Limit}";
+								    WHERE T.[row] BETWEEN 1 AND {_context.Options.CdcConfig.Limit}";
             var changeData = ToCT(GetConnection().QueryDataSet(new SqlDataAdapter(), execSql));
             //记录本次seq
             if (changeData != null && changeData.Any())
@@ -302,7 +308,7 @@ namespace Kogel.Subscribe.Mssql
         /// <returns></returns>
         private bool IsExsitsCdc()
         {
-            var result = GetConnection().QueryFirst<int>($"SELECT TOP 1 is_tracked_by_cdc FROM sys.tables where [name] ='{_context._tableName}'");
+            var result = GetConnection().QueryFirst<int>($"SELECT TOP 1 is_tracked_by_cdc FROM sys.tables where [name] ='{_context.TableName}'");
             return result > 0;
         }
 
@@ -321,7 +327,7 @@ namespace Kogel.Subscribe.Mssql
         /// <returns></returns>
         private string GetCtTableName()
         {
-            return $"cdc.{GetSchema()}_{_context._tableName}_CT";
+            return $"cdc.{GetSchema()}_{_context.TableName}_CT";
         }
 
         /// <summary>
@@ -393,6 +399,7 @@ namespace Kogel.Subscribe.Mssql
         {
             _conn?.Dispose();
             _middlewareSubscribe?.Dispose();
+            _context?.Dispose();
         }
     }
 }

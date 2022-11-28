@@ -5,9 +5,7 @@ using Nest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
@@ -37,7 +35,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         {
             this._context = context;
             this._client = GetClient();
-            _funcWriteInterceptor = _context._options.ElasticsearchConfig?.WriteInterceptor?.Compile();
+            _funcWriteInterceptor = _context.Options.ElasticsearchConfig?.WriteInterceptor?.Compile();
         }
 
         /// <summary>
@@ -47,7 +45,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <returns></returns>
         private ElasticClient GetClient(string esIndexName = null)
         {
-            var settings = _context._options.ElasticsearchConfig.Settings.DefaultIndex(esIndexName ?? GetIndexName());
+            var settings = _context.Options.ElasticsearchConfig.Settings.DefaultIndex(esIndexName ?? GetIndexName());
             return new ElasticClient(settings);
         }
 
@@ -267,8 +265,12 @@ namespace Kogel.Subscribe.Mssql.Middleware
                 return type.Name;
             if (!string.IsNullOrEmpty(elasticsearchType.RelationName))
                 return elasticsearchType.RelationName;
+#pragma warning disable CS0618 // 类型或成员已过时
             if (!string.IsNullOrEmpty(elasticsearchType.Name))
+#pragma warning restore CS0618 // 类型或成员已过时
+#pragma warning disable CS0618 // 类型或成员已过时
                 return elasticsearchType.Name;
+#pragma warning restore CS0618 // 类型或成员已过时
             return type.Name;
         }
 

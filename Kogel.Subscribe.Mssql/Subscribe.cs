@@ -11,7 +11,6 @@ namespace Kogel.Subscribe.Mssql
     public abstract class Subscribe<T> : ISubscribe<T>
         where T : class
     {
-
         /// <summary>
         /// 
         /// </summary>

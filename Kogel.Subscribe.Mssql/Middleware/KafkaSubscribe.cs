@@ -28,9 +28,9 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <param name="messageList"></param>
         public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
-            using (var producer = new ProducerBuilder<Null, string>(_context._options.KafkaConfig).Build())
+            using (var producer = new ProducerBuilder<Null, string>(_context.Options.KafkaConfig).Build())
             {
-                producer.Produce(_context._options.TopicName ?? $"kogel_subscribe_{_context._tableName}", new Message<Null, string>()
+                producer.Produce(_context.Options.TopicName ?? $"kogel_subscribe_{_context.TableName}", new Message<Null, string>()
                 {
                     Value = JsonConvert.SerializeObject(messageList)
                 }, (result) =>

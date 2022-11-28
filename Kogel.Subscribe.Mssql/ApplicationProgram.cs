@@ -6,7 +6,7 @@ using System.Reflection;
 namespace Kogel.Subscribe.Mssql
 {
     /// <summary>
-    /// 
+    /// 应用程序入口
     /// </summary>
     public class ApplicationProgram
     {
@@ -30,20 +30,17 @@ namespace Kogel.Subscribe.Mssql
             var currentAssembly = trace.GetFrame(1)?.GetMethod()?.DeclaringType?.Assembly;
             assemblies.Add(currentAssembly);
             if (assemblyList != null)
-            {
                 assemblies.AddRange(assemblyList);
-            }
             var subscribeTypeInfo = typeof(Subscribe<>).GetTypeInfo();
             foreach (var assembly in assemblies)
             {
                 foreach (var classImpl in assembly.GetTypes())
                 {
-                    //判断是否继承过CcSubscribe
+                    //判断是否继承过Subscribe
                     if (!classImpl.Attributes.HasFlag(TypeAttributes.Abstract) && IsAssignableToGenericType(classImpl.GetTypeInfo(), subscribeTypeInfo))
                     {
                         //只要继承过都需要启动
-                        var impl = Activator.CreateInstance(classImpl) as ISubscribe<object>;
-                        if (impl != null)
+                        if (Activator.CreateInstance(classImpl) is ISubscribe<object> impl)
                         {
                             _subscribes.Add(impl);
                         }
@@ -76,7 +73,7 @@ namespace Kogel.Subscribe.Mssql
         /// <summary>
         /// 
         /// </summary>
-        public void Close()
+        public static void Close()
         {
             _subscribes?.ForEach(x => x?.Dispose());
         }
