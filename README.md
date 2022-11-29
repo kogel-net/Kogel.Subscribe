@@ -1,2 +1,2 @@
-# Kogel.Subscribe.Mssql
-SQL Server增量订阅
+# Kogel.Subscribe
+DB增量订阅
