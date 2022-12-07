@@ -308,7 +308,7 @@ namespace Kogel.Subscribe.Mssql
         /// <returns></returns>
         private bool IsExsitsCdc()
         {
-            var result = GetConnection().QueryFirst<int>($"SELECT TOP 1 is_tracked_by_cdc FROM sys.tables where [name] ='{_context.TableName}'");
+            var result = GetConnection().QueryFirst<int>($"SELECT TOP 1 ISNULL(is_tracked_by_cdc, 0) FROM sys.tables where [name] ='{_context.TableName}'");
             return result > 0;
         }
 

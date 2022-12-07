@@ -16,7 +16,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        private List<ISubscribe<T>> _queueSubscribeList;
+        private List<ISubscribe<T>> _middlewareSubscribeList;
 
         /// <summary>
         /// 
@@ -34,7 +34,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <returns></returns>
         public MiddlewareSubscribe<T> Register()
         {
-            this._queueSubscribeList = new List<ISubscribe<T>> 
+            this._middlewareSubscribeList = new List<ISubscribe<T>> 
             {
                 new VolumeSubscribe<T>(_context)
             };
@@ -58,7 +58,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
                         default:
                             throw new Exception($"未实现的中间件订阅【{middlewareType}】");
                     }
-                    _queueSubscribeList.Add(queueSubscribe);
+                    _middlewareSubscribeList.Add(queueSubscribe);
                 }
             }
             return this;
@@ -70,7 +70,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <param name="messageList"></param>
         public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
-            this._queueSubscribeList?.ForEach(x => x?.Subscribes(messageList));
+            this._middlewareSubscribeList?.ForEach(x => x?.Subscribes(messageList));
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         public void Dispose()
         {
-            this._queueSubscribeList?.ForEach(x => x?.Dispose());
+            this._middlewareSubscribeList?.ForEach(x => x?.Dispose());
         }
     }
 }

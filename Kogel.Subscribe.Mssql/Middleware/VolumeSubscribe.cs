@@ -54,7 +54,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
     {
         private readonly string _path;
 
-        private readonly FileObjectLock @lock;
+        private readonly ObjectLock @lock;
 
         private readonly SubscribeContext<T> _context;
 
@@ -69,7 +69,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
                 {
                     Directory.CreateDirectory(directoryFullName);
                 }
-                @lock = FileObjectLock.CreateOrGet(_path);
+                @lock = ObjectLock.CreateOrGet(_path);
             }
         }
 
@@ -163,45 +163,6 @@ namespace Kogel.Subscribe.Mssql.Middleware
         public void Dispose()
         {
             _streamWriter?.Dispose();
-        }
-
-        /// <summary>
-        /// 文件对象锁
-        /// </summary>
-        public sealed class FileObjectLock : object
-        {
-            private static readonly ThreadLocal<FileObjectLock> _local;
-
-            private readonly string _key;
-
-            static FileObjectLock()
-            {
-                _local = new ThreadLocal<FileObjectLock>(true);
-            }
-
-            private FileObjectLock(string key)
-            {
-                this._key = key;
-            }
-
-            /// <summary>
-            /// 创建或者得到一个文件锁
-            /// </summary>
-            /// <param name="path"></param>
-            /// <returns></returns>
-            public static FileObjectLock CreateOrGet(string lockKey)
-            {
-                lock (_local)
-                {
-                    var lockLocal = _local.Values?.FirstOrDefault(x => x._key == lockKey);
-                    if (lockLocal is null)
-                    {
-                        _local.Value = new FileObjectLock(lockKey);
-                        lockLocal = _local.Value;
-                    }
-                    return lockLocal;
-                }
-            }
         }
     }
 }

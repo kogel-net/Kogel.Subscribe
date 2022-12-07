@@ -20,6 +20,6 @@ namespace Kogel.Subscribe.Mssql.Entites
         /// <summary>
         /// Es写入拦截
         /// </summary>
-        public Expression<Func<SubscribeMessage<T>, EsSubscribeMessage<T>>> WriteInterceptor { get; set; }
+        public Expression<Func<SubscribeMessage<T>, EsSubscribeMessage<object>>> WriteInterceptor { get; set; }
     }
 }
