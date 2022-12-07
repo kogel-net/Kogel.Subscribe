@@ -12,7 +12,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
     /// rabbitmq订阅，推送到rabbitmq队列中
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RabbitmqSubscribe1<T> : ISubscribe<T>
+    public class RabbitMQSubscribe<T> : ISubscribe<T>
          where T : class
     {
         /// <summary>
@@ -24,7 +24,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// 
         /// </summary>
         private readonly ThreadLocal<IConnection> _connectionLocal;
-        public RabbitmqSubscribe1(SubscribeContext<T> context)
+        public RabbitMQSubscribe(SubscribeContext<T> context)
         {
             this._context = context;
             this._connectionLocal = new ThreadLocal<IConnection>(true);
