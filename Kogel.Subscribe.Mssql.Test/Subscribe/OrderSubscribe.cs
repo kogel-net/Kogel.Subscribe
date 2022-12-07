@@ -30,7 +30,8 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
 
             builder.BuildCdcConfig(new CdcConfig
             {
-                OffsetPosition = Entites.Enum.OffsetPositionEnum.Abort
+                OffsetPosition = Entites.Enum.OffsetPositionEnum.Abort,
+                IsFirstScanFull = true
             });
         }
 

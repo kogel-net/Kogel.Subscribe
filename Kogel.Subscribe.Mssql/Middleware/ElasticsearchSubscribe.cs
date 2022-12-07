@@ -24,7 +24,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <summary>
         /// 
         /// </summary>
-        private ElasticClient _client;
+        private readonly ElasticClient _defaultClient;
 
         /// <summary>
         /// 拦截转换器
@@ -36,23 +36,17 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         private readonly List<string> _esNameList;
 
-        public ElasticsearchSubscribe(SubscribeContext<T> context)
-        {
-            this._context = context;
-            this._client = GetClient();
-            _funcWriteInterceptor = _context.Options.ElasticsearchConfig?.WriteInterceptor?.Compile();
-            _esNameList = new List<string>();
-        }
-
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="esIndexName"></param>
-        /// <returns></returns>
-        private ElasticClient GetClient(string esIndexName = null)
+        /// <param name="context"></param>
+        public ElasticsearchSubscribe(SubscribeContext<T> context)
         {
-            var settings = _context.Options.ElasticsearchConfig.Settings.DefaultIndex(esIndexName ?? GetIndexName());
-            return new ElasticClient(settings);
+            this._context = context;
+            var settings = _context.Options.ElasticsearchConfig.Settings.DefaultIndex(GetIndexName());
+            this._defaultClient = new ElasticClient(settings);
+            _funcWriteInterceptor = _context.Options.ElasticsearchConfig?.WriteInterceptor?.Compile();
+            _esNameList = new List<string>();
         }
 
         /// <summary>
@@ -78,18 +72,22 @@ namespace Kogel.Subscribe.Mssql.Middleware
             //消费并写入es
             foreach (var message in esMessageList)
             {
-                if (isShards)
-                    _client = GetClient(message.EsIndexName);
                 if (message.Operation == OperationEnum.DELETE)
                 {
                     //获取主键属性
                     var (idName, idProperty) = GetIdentity();
                     var id = idProperty.GetValue(message.Result);
-                    _client.Delete(DocumentPath<T>.Id(id.ToString()));
+                    if (isShards)
+                        _defaultClient.Delete(DocumentPath<T>.Id(new Id(id)), i => i.Index(message.EsIndexName));
+                    else
+                        _defaultClient.Delete(DocumentPath<T>.Id(new Id(id)));
                 }
                 else
                 {
-                    _client.IndexDocument(message.Result);
+                    if (isShards)
+                        _defaultClient.Index(message.Result, i => i.Index(message.EsIndexName));
+                    else
+                        _defaultClient.IndexDocument(message.Result);
                 }
             }
         }
@@ -165,7 +163,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
                 if (!_esNameList.Any(x => x == esIndexName))
                 {
                     _esNameList.Add(esIndexName);
-                    if (!(_client.Indices.Exists(esIndexName)).Exists)
+                    if (!(_defaultClient.Indices.Exists(esIndexName)).Exists)
                     {
                         var indsettings = new IndexSettings(_esIndexSetting)
                         {
@@ -192,7 +190,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
                         indsettings.Analysis.Analyzers.Add("ngram_analyzer_long", longAnalyzer);
                         indsettings.Analysis.Tokenizers.Add("ngram_tokenizer_long", new NGramTokenizer { MinGram = 5, MaxGram = 5 });
                         var indexState = new IndexState { Settings = indsettings };
-                        var response = _client.Indices
+                        var response = _defaultClient.Indices
                             .Create(esIndexName, p => p.InitializeUsing(indexState)
                                 .Map(x => x.AutoMap(esType)
                                     .Properties((propertiesSelector) =>

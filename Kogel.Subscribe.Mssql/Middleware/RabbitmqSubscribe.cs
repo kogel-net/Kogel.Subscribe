@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 using Kogel.Dapper.Extension;
+using RabbitMQ.Client;
+using System.Threading;
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
@@ -17,9 +19,15 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// 
         /// </summary>
         private readonly SubscribeContext<T> _context;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly ThreadLocal<IConnection> _connectionLocal;
         public RabbitMQSubscribe(SubscribeContext<T> context)
         {
             this._context = context;
+            this._connectionLocal = new ThreadLocal<IConnection>(true);
         }
 
         /// <summary>
@@ -28,15 +36,13 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <param name="messageList"></param>
         public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
-            using (var connection = _context.Options.RabbitMQConfig.CreateConnection())
+            if (_connectionLocal.Value is null)
+                _connectionLocal.Value = _context.Options.RabbitMQConfig.CreateConnection();
+            using (var channel = _connectionLocal.Value.CreateModel())
             {
-                using (var channel = connection.CreateModel())
-                {
-                    //发送消息
-                    string exchange = _context.Options.TopicName ?? $"kogel_subscribe_{_context.TableName}";
-                    var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageList));
-                    channel.BasicPublish(exchange: exchange, mandatory: false, routingKey: "", basicProperties: null, body: body);
-                }
+                string exchange = _context.Options.TopicName ?? $"kogel_subscribe_exchange_{_context.TableName}";
+                var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageList));
+                channel.BasicPublish(exchange: exchange, mandatory: false, routingKey: "", basicProperties: null, body: body);
             }
         }
 
@@ -45,6 +51,9 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         public void Dispose()
         {
+            if (!(_connectionLocal.Values is null))
+                foreach (var connection in _connectionLocal.Values)
+                    connection.Dispose();
         }
     }
 }

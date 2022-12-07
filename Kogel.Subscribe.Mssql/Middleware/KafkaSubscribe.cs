@@ -3,7 +3,8 @@ using System;
 using System.Collections.Generic;
 using Confluent.Kafka;
 using Newtonsoft.Json;
-using Kogel.Dapper.Extension;
+using System.Linq;
+using System.Threading;
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
@@ -17,9 +18,15 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// 
         /// </summary>
         private readonly SubscribeContext<T> _context;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly ThreadLocal<IProducer<Null, string>> _producerLocal;
         public KafkaSubscribe(SubscribeContext<T> context)
         {
             this._context = context;
+            this._producerLocal = new ThreadLocal<IProducer<Null, string>>(true);
         }
 
         /// <summary>
@@ -28,16 +35,17 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// <param name="messageList"></param>
         public void Subscribes(List<SubscribeMessage<T>> messageList)
         {
-            using (var producer = new ProducerBuilder<Null, string>(_context.Options.KafkaConfig).Build())
+            if (_producerLocal.Value is null)
+                _producerLocal.Value = new ProducerBuilder<Null, string>(_context.Options.KafkaConfig).Build();
+            string topic = _context.Options.TopicName ?? $"kogel_subscribe_topic_{_context.TableName}";
+            _producerLocal.Value.Produce(topic, new Message<Null, string>()
             {
-                producer.Produce(_context.Options.TopicName ?? $"kogel_subscribe_{_context.TableName}", new Message<Null, string>()
-                {
-                    Value = JsonConvert.SerializeObject(messageList)
-                }, (result) =>
-                {
-                    Console.WriteLine(!result.Error.IsError ? $"推送消息到 {result.TopicPartitionOffset}" : $"推送异常: {result.Error.Reason}");
-                });
-            }
+                Value = JsonConvert.SerializeObject(messageList)
+            }, (result) =>
+            {
+                Console.WriteLine(!result.Error.IsError ? $"推送消息到 {result.TopicPartitionOffset}" : $"推送异常: {result.Error.Reason}");
+            });
+
         }
 
         /// <summary>
@@ -45,6 +53,9 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         public void Dispose()
         {
+            if (!(_producerLocal.Values is null))
+                foreach (var producer in _producerLocal.Values)
+                    producer.Dispose();
         }
     }
 }

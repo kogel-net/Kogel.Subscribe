@@ -43,22 +43,22 @@ namespace Kogel.Subscribe.Mssql.Middleware
             {
                 foreach (var middlewareType in _context.Options.MiddlewareTypeList.Distinct())
                 {
-                    ISubscribe<T> queueSubscribe;
+                    ISubscribe<T> middlewareSubscribe;
                     switch (middlewareType)
                     {
                         case MiddlewareEnum.Elasticsearch:
-                            queueSubscribe = new ElasticsearchSubscribe<T>(_context);
+                            middlewareSubscribe = new ElasticsearchSubscribe<T>(_context);
                             break;
                         case MiddlewareEnum.Kafka:
-                            queueSubscribe = new KafkaSubscribe<T>(_context);
+                            middlewareSubscribe = new KafkaSubscribe<T>(_context);
                             break;
                         case MiddlewareEnum.RabbitMQ:
-                            queueSubscribe = new RabbitMQSubscribe<T>(_context);
+                            middlewareSubscribe = new RabbitMQSubscribe<T>(_context);
                             break;
                         default:
                             throw new Exception($"未实现的中间件订阅【{middlewareType}】");
                     }
-                    _middlewareSubscribeList.Add(queueSubscribe);
+                    _middlewareSubscribeList.Add(middlewareSubscribe);
                 }
             }
             return this;
