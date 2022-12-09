@@ -226,5 +226,9 @@ namespace Kogel.Slave.Mysql.Extension
 			return true;
 		}
 
-	}
+        internal static string ReadString(ref this SequenceReader<byte> reader, long length = 0)
+        {
+            return ReadString(ref reader, Encoding.UTF8, length);
+        }
+    }
 }
