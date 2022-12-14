@@ -1,7 +1,6 @@
 using System;
 using System.Buffers;
 using System.Text;
-using Kogel.Slave.Mysql.Extension;
 using SuperSocket.ProtoBase;
 
 namespace Kogel.Slave.Mysql
@@ -24,8 +23,8 @@ namespace Kogel.Slave.Mysql
         private string ReadServerVersion(ref SequenceReader<byte> reader, int len)
         {
             ReadOnlySequence<byte> seq;
-            ReadOnlySpan<byte> delimiter = new[] { (byte)0x00 };
-            if (reader.TryReadTo(out seq, delimiter, false))
+
+            if (reader.TryReadTo(out seq, 0x00, false))
             {
                 if (seq.Length > len)                    
                 {
@@ -57,7 +56,7 @@ namespace Kogel.Slave.Mysql
 
             ServerVersion = ReadServerVersion(ref reader, 50);     
 
-            reader.TryReadLittleEndian(out short seconds);
+            reader.TryReadLittleEndian(out int seconds);
             CreateTimestamp = LogEvent.GetTimestampFromUnixEpoch(seconds);
 
             reader.TryRead(out byte eventLen);

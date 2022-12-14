@@ -155,32 +155,6 @@ namespace SuperSocket.Channel
 			}
 		}
 
-		public T Read()
-        {
-			lock (_syncRoot)
-			{
-				if (TryRead(out var value))
-				{
-					if (_lastReadIsWait)
-					{
-						_taskSourceCore.Reset();
-						_lastReadIsWait = false;
-					}
-					_length--;
-					if (_length == 0)
-					{
-						OnWaitTaskStart();
-					}
-					return value;
-				}
-				_waiting = true;
-				_lastReadIsWait = true;
-				_taskSourceCore.Reset();
-				OnWaitTaskStart();
-				return new ValueTask<T>(this, _taskSourceCore.Version).Result;
-			}
-		}
-
 		protected virtual void OnWaitTaskStart()
 		{
 		}

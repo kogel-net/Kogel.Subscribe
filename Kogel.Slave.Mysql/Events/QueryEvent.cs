@@ -1,7 +1,6 @@
 using System;
 using System.Buffers;
 using System.Text;
-using Kogel.Slave.Mysql.Extension;
 using SuperSocket.ProtoBase;
 
 namespace Kogel.Slave.Mysql
@@ -22,10 +21,10 @@ namespace Kogel.Slave.Mysql
 
         protected internal override void DecodeBody(ref SequenceReader<byte> reader, object context)
         {
-            reader.TryReadLittleEndian(out short slaveProxyID);
+            reader.TryReadLittleEndian(out int slaveProxyID);
             SlaveProxyID = slaveProxyID;
 
-            reader.TryReadLittleEndian(out short seconds);
+            reader.TryReadLittleEndian(out int seconds);
             ExecutionTime = LogEvent.GetTimestampFromUnixEpoch(seconds);
 
             reader.TryRead(out byte schemaLen);

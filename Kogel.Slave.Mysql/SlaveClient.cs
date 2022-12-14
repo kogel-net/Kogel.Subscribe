@@ -94,19 +94,18 @@ namespace Kogel.Slave.Mysql
             try
             {
                 var binlogInfo = await GetBinlogFileNameAndPosition(mysqlConn);
-
+                //检查binlog
                 var binlogChecksum = await GetBinlogChecksum(mysqlConn);
                 await ConfirmChecksum(mysqlConn);
                 LogEvent.ChecksumType = binlogChecksum;
 
                 _stream = GetStreamFromMySQLConnection(mysqlConn);
                 _serverId = serverId;
-
+                //发送dump到master
                 await StartDumpBinlog(_stream, serverId, binlogInfo.Item1, binlogInfo.Item2);
-
                 _connection = mysqlConn;
-
-                var channel = new StreamPipeChannel<LogEvent>(_stream, null,
+                //设置频道
+                SetupChannel(new StreamPipeChannel<LogEvent>(_stream, null,
                     new LogEventPipelineFilter
                     {
                         Context = new SlaveState()
@@ -114,9 +113,9 @@ namespace Kogel.Slave.Mysql
                     new ChannelOptions
                     {
                         Logger = Logger
-                    });
-
-                SetupChannel(channel);
+                    }));
+                //开始接收消息
+                base.StartReceive();
                 return new LoginResult { Result = true };
             }
             catch (Exception e)
@@ -224,16 +223,6 @@ namespace Kogel.Slave.Mysql
             var data = GetDumpBinlogCommand(serverId, fileName, position);
             await stream.WriteAsync(data);
             await stream.FlushAsync();
-        }
-
-        public new void StartReceive()
-        {
-            base.StartReceive();
-        }
-
-        public new ValueTask<LogEvent> ReceiveAsync()
-        {
-            return base.ReceiveAsync();
         }
 
         public override async ValueTask CloseAsync()

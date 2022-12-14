@@ -8,34 +8,34 @@ using SuperSocket.ProtoBase;
 namespace SuperSocket.Channel
 {
 
-    public interface IChannel
-    {
-        bool IsClosed { get; }
+	public interface IChannel
+	{
+		bool IsClosed { get; }
 
-        EndPoint RemoteEndPoint { get; }
+		EndPoint RemoteEndPoint { get; }
 
-        EndPoint LocalEndPoint { get; }
+		EndPoint LocalEndPoint { get; }
 
-        DateTimeOffset LastActiveTime { get; }
+		DateTimeOffset LastActiveTime { get; }
 
-        CloseReason? CloseReason { get; }
+		CloseReason? CloseReason { get; }
 
-        event EventHandler<CloseEventArgs> Closed;
+		event EventHandler<CloseEventArgs> Closed;
 
-        void Start();
+		void Start();
 
-        ValueTask SendAsync(ReadOnlyMemory<byte> data);
+		ValueTask SendAsync(ReadOnlyMemory<byte> data);
 
-        ValueTask SendAsync<TPackage>(IPackageEncoder<TPackage> packageEncoder, TPackage package);
+		ValueTask SendAsync<TPackage>(IPackageEncoder<TPackage> packageEncoder, TPackage package);
 
-        ValueTask SendAsync(Action<PipeWriter> write);
+		ValueTask SendAsync(Action<PipeWriter> write);
 
-        ValueTask CloseAsync(CloseReason closeReason);
+		ValueTask CloseAsync(CloseReason closeReason);
 
-        ValueTask DetachAsync();
-    }
-    public interface IChannel<TPackageInfo> : IChannel
-    {
-        IAsyncEnumerable<TPackageInfo> RunAsync();
-    }
+		ValueTask DetachAsync();
+	}
+	public interface IChannel<TPackageInfo> : IChannel
+	{
+		IAsyncEnumerable<TPackageInfo> RunAsync();
+	}
 }

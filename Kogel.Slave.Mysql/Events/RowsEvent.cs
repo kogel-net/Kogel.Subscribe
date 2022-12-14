@@ -3,7 +3,6 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Kogel.Slave.Mysql.Extension;
 using SuperSocket.ProtoBase;
 
 namespace Kogel.Slave.Mysql
@@ -204,7 +203,7 @@ namespace Kogel.Slave.Mysql
 
         private object ReadCell(ref SequenceReader<byte> reader, ColumnType columnType, int meta, int length)
         {
-            var dataType = DataTypes[(int)columnType] as IMySQLDataType;
+            var dataType = DataTypes[(int)columnType] as IDataType;
 
             if (dataType == null)
                 throw new NotImplementedException();

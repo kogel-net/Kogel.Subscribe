@@ -48,6 +48,7 @@ namespace SuperSocket.Channel
 			}
 			return total;
 		}
+
 		protected override ValueTask<int> FillPipeWithDataAsync(Memory<byte> memory, CancellationToken cancellationToken)
 		{
 			throw new NotSupportedException();

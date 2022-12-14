@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Kogel.Slave.Mysql.Extension;
 using SuperSocket.ProtoBase;
 
 namespace Kogel.Slave.Mysql
@@ -100,7 +99,7 @@ namespace Kogel.Slave.Mysql
                     case ColumnType.SET:
                     case ColumnType.ENUM:
                     case ColumnType.STRING:
-                        reader.TryReadBigEndian(out int value);
+                        reader.TryReadBigEndian(out short value);
                         columnMetadata[i] = (int)value;
                         break;
                     case ColumnType.TIME_V2:

@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace Kogel.Slave.Mysql
 {
-    class NewDecimalType : IMySQLDataType
+    class NewDecimalType : IDataType
     {
         public object ReadValue(ref SequenceReader<byte> reader, int meta)
         {

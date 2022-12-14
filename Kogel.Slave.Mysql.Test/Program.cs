@@ -32,6 +32,10 @@ namespace Kogel.Slave.Mysql.Test
             var serverId = 123456; // replication server id
 
             var client = new SlaveClient();
+
+
+            client.PackageHandler += Client_PackageHandler;
+
             var result = await client.ConnectAsync(serverHost, username, password, serverId);
 
 
@@ -41,9 +45,7 @@ namespace Kogel.Slave.Mysql.Test
                 return;
             }
 
-            client.PackageHandler += Client_PackageHandler;
-            client.StartReceive();
-
+    
             Console.ReadLine();
 
             await client.CloseAsync();

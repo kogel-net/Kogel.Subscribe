@@ -3,7 +3,6 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Kogel.Slave.Mysql.Extension;
 using SuperSocket.ProtoBase;
 
 namespace Kogel.Slave.Mysql
@@ -30,7 +29,7 @@ namespace Kogel.Slave.Mysql
                     reader.TryRead(out byte b);
                     SetBitArray(array, b, i, length);
                 }
-            }
+            }            
 
             return array;
         }
@@ -54,7 +53,7 @@ namespace Kogel.Slave.Mysql
             if (encoding == null)
                 encoding = Encoding.UTF8;
 
-            if (reader.TryReadTo(out ReadOnlySequence<byte> seq, BitConverter.GetBytes(0x00), false))
+            if (reader.TryReadTo(out ReadOnlySequence<byte> seq, 0x00, false))
             {
                 consumed = seq.Length + 1;
                 var result = seq.GetString(encoding);
@@ -76,16 +75,16 @@ namespace Kogel.Slave.Mysql
         {
             return ReadString(ref reader, Encoding.UTF8, length);
         }
-
+        
         internal static string ReadString(ref this SequenceReader<byte> reader, Encoding encoding, long length = 0)
         {
             if (length == 0 || reader.Remaining <= length)
                 return ReadString(ref reader, encoding);
 
             // reader.Remaining > length
-            var seq = reader.Sequence.Slice(reader.Consumed, length);
+            var seq = reader.Sequence.Slice(reader.Consumed, length);            
             var consumed = 0L;
-
+            
             try
             {
                 var subReader = new SequenceReader<byte>(seq);
@@ -101,7 +100,7 @@ namespace Kogel.Slave.Mysql
         {
             if (length > 4)
                 throw new ArgumentException("Length cannot be more than 4.", nameof(length));
-
+    
             var unit = 1;
             var value = 0;
 
@@ -119,7 +118,7 @@ namespace Kogel.Slave.Mysql
         {
             if (length > 4)
                 throw new ArgumentException("Length cannot be more than 4.", nameof(length));
-
+    
             var unit = (int)Math.Pow(256, length - 1);
             var value = 0;
 
@@ -189,7 +188,7 @@ namespace Kogel.Slave.Mysql
 
             if (b0 == 0xFE) // 254
             {
-                reader.TryReadLittleEndian(out short longValue);
+                reader.TryReadLittleEndian(out long longValue);
                 return longValue;
             }
 

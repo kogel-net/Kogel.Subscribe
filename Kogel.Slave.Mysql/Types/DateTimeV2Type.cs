@@ -5,7 +5,7 @@ using System.Buffers;
 
 namespace Kogel.Slave.Mysql
 {
-    class DateTimeV2Type : TimeBaseType, IMySQLDataType
+    class DateTimeV2Type : TimeBaseType, IDataType
     {
         public object ReadValue(ref SequenceReader<byte> reader, int meta)
         {

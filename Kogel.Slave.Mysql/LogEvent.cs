@@ -2,7 +2,6 @@
 using System.Buffers;
 using System.Collections;
 using System.Text;
-using Kogel.Slave.Mysql.Extension;
 using SuperSocket.ProtoBase;
 
 namespace Kogel.Slave.Mysql
@@ -17,7 +16,7 @@ namespace Kogel.Slave.Mysql
         public int Position { get; set; }
         public LogEventFlag Flags { get; set; }
 
-        internal static IMySQLDataType[] DataTypes { get; private set; } = new IMySQLDataType[256];
+        internal static IDataType[] DataTypes { get; private set; } = new IDataType[256];
 
         static LogEvent()
         {

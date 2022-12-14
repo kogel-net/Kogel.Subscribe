@@ -8,7 +8,5 @@ namespace SuperSocket.Channel
 		int Write(T target);
 
 		ValueTask<T> ReadAsync();
-
-		T Read();
 	}
 }
