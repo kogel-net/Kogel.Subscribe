@@ -1,6 +1,6 @@
-﻿using Kogel.Slave.Mysql.Extension.DataType;
-using System;
+﻿using System;
 using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -111,6 +111,7 @@ namespace Kogel.Slave.Mysql.Extension
             }
         }
 
+#if NETSTANDARD2_0
         public static bool TryReadLittleEndian(this ref SequenceReader<byte> reader, out short value)
         {
             if (BitConverter.IsLittleEndian)
@@ -119,6 +120,7 @@ namespace Kogel.Slave.Mysql.Extension
             }
             return TryReadReverseEndianness(ref reader, out value);
         }
+#endif
 
         private static bool TryReadReverseEndianness(ref SequenceReader<byte> reader, out short value)
         {
@@ -182,7 +184,8 @@ namespace Kogel.Slave.Mysql.Extension
 			}
 		}
 
-		public static bool TryReadBigEndian(this ref SequenceReader<byte> reader, out int value)
+#if NETSTANDARD2_0
+        public static bool TryReadBigEndian(this ref SequenceReader<byte> reader, out int value)
 		{
 			if (!BitConverter.IsLittleEndian)
 			{
@@ -193,8 +196,9 @@ namespace Kogel.Slave.Mysql.Extension
 			value = svalue;
 			return isfig;
 		}
+#endif
 
-		[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Field, Inherited = false)]
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Field, Inherited = false)]
 		internal sealed class IntrinsicAttribute : Attribute
 		{
 		}

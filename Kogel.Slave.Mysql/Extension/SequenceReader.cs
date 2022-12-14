@@ -7,6 +7,7 @@ using System.Text;
 
 namespace Kogel.Slave.Mysql.Extension
 {
+#if NETSTANDARD2_0
     /// <summary>
     /// 内存序列话读取
     /// </summary>
@@ -493,9 +494,103 @@ namespace Kogel.Slave.Mysql.Extension
             return true;
         }
 
+        public bool TryReadTo(out ReadOnlySequence<T> sequence, ReadOnlySpan<T> delimiter, bool advancePastDelimiter = true)
+        {
+            if (delimiter.Length == 0)
+            {
+                sequence = default(ReadOnlySequence<T>);
+                return true;
+            }
+            SequenceReader<T> sequenceReader = this;
+            bool flag = false;
+            while (!End)
+            {
+                if (!TryReadTo(out sequence, delimiter, advancePastDelimiter: false))
+                {
+                    this = sequenceReader;
+                    return false;
+                }
+                if (delimiter.Length == 1)
+                {
+                    if (advancePastDelimiter)
+                    {
+                        Advance(1L);
+                    }
+                    return true;
+                }
+                if (IsNext(delimiter))
+                {
+                    if (flag)
+                    {
+                        sequence = sequenceReader.Sequence.Slice(sequenceReader.Consumed, Consumed - sequenceReader.Consumed);
+                    }
+                    if (advancePastDelimiter)
+                    {
+                        Advance(delimiter.Length);
+                    }
+                    return true;
+                }
+                Advance(1L);
+                flag = true;
+            }
+            this = sequenceReader;
+            sequence = default(ReadOnlySequence<T>);
+            return false;
+        }
 
-      
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsNext(ReadOnlySpan<T> next, bool advancePast = false)
+        {
+            ReadOnlySpan<T> unreadSpan = UnreadSpan;
+            if (unreadSpan.StartsWith(next))
+            {
+                if (advancePast)
+                {
+                    AdvanceCurrentSpan(next.Length);
+                }
+                return true;
+            }
+            if (unreadSpan.Length < next.Length)
+            {
+                return IsNextSlow(next, advancePast);
+            }
+            return false;
+        }
+        private bool IsNextSlow(ReadOnlySpan<T> next, bool advancePast)
+        {
+            ReadOnlySpan<T> value = UnreadSpan;
+            int length = next.Length;
+            SequencePosition position = nextPosition;
+            while (next.StartsWith(value))
+            {
+                if (next.Length == value.Length)
+                {
+                    if (advancePast)
+                    {
+                        Advance(length);
+                    }
+                    return true;
+                }
+                ReadOnlyMemory<T> memory;
+                do
+                {
+                    if (!Sequence.TryGet(ref position, out memory))
+                    {
+                        return false;
+                    }
+                }
+                while (memory.Length <= 0);
+                next = next.Slice(value.Length);
+                value = memory.Span;
+                if (value.Length > next.Length)
+                {
+                    value = value.Slice(0, next.Length);
+                }
+            }
+            return false;
+        }
+
     }
 
-   
+#endif
 }

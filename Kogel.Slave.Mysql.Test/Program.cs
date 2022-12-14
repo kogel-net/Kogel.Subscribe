@@ -9,12 +9,14 @@ using System.IO;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using Kogel.Slave.Mysql;
+using System.Threading.Tasks;
 
 namespace Kogel.Slave.Mysql.Test
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World!");
 
@@ -24,14 +26,39 @@ namespace Kogel.Slave.Mysql.Test
                 conn.Open();
             }
 
-      
+            var serverHost = "192.168.159.128";
+            var username = "root";
+            var password = "123456";
+            var serverId = 123456; // replication server id
+
+            var client = new SlaveClient();
+            var result = await client.ConnectAsync(serverHost, username, password, serverId);
+
+
+            if (!result.Result)
+            {
+                Console.WriteLine($"Failed to connect: {result.Message}.");
+                return;
+            }
+
+            client.PackageHandler += Client_PackageHandler;
+            client.StartReceive();
+
+            Console.ReadLine();
+
+            await client.CloseAsync();
 
         }
 
-     
-   
+        private static async ValueTask Client_PackageHandler(SuperSocket.Client.EasyClient<LogEvent> sender, LogEvent package)
+        {
+          
 
-      
+            await Task.CompletedTask;
+        }
+
+
+
 
 
 

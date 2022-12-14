@@ -1,6 +1,4 @@
-﻿using Kogel.Slave.Mysql.Entites.Enum;
-using Kogel.Slave.Mysql.Event;
-using Kogel.Slave.Mysql.Interface;
+﻿using SuperSocket.ProtoBase;
 using System;
 using System.Buffers;
 
@@ -30,35 +28,35 @@ namespace Kogel.Slave.Mysql.Extension
             var timestamp = LogEvent.GetTimestampFromUnixEpoch(seconds);
 
             reader.TryRead(out byte eventTypeValue);
-            var eventType = (LogEventTypeEnum)eventTypeValue;
+            var eventType = (LogEventType)eventTypeValue;
 
             var log = CreateLogEvent(eventType, context);
 
             log.Timestamp = timestamp;
-            log.LogEventType = eventType;
+            log.EventType = eventType;
 
             reader.TryReadLittleEndian(out short serverID);
-            log.ServerId = serverID;
+            log.ServerID = serverID;
 
             reader.TryReadLittleEndian(out short eventSize);
-            log.LogEventSize = eventSize;
+            log.EventSize = eventSize;
 
             reader.TryReadLittleEndian(out short position);
-            log.LogPosition = position;
+            log.Position = position;
 
             reader.TryReadLittleEndian(out short flags);
-            log.LogEventFlag = (LogEventFlagEnum)flags;
+            log.Flags = (LogEventFlag)flags;
 
             log.DecodeBody(ref reader, context);
 
             return log;
         }
 
-        protected virtual LogEvent CreateLogEvent(LogEventTypeEnum eventType, object context)
+        protected virtual LogEvent CreateLogEvent(LogEventType eventType, object context)
         {
             if (Activator.CreateInstance(context.GetType()) is LogEvent log)
             {
-                log.LogEventType = eventType;
+                log.EventType = eventType;
             }
             else
             {
