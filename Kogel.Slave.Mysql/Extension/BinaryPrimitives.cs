@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using static Kogel.Slave.Mysql.Extension.SequenceReaderExtension;
+using static System.Buffers.SequenceReaderExtension;
 
 namespace Kogel.Slave.Mysql.Extension
 {

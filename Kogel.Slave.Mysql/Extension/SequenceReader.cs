@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Kogel.Slave.Mysql.Extension
+namespace System.Buffers
 {
 #if NETSTANDARD2_0
     /// <summary>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kogel.Slave.Mysql.Extension
+namespace System.Net.Security
 {
 	public readonly struct SslApplicationProtocol : IEquatable<SslApplicationProtocol>
 	{

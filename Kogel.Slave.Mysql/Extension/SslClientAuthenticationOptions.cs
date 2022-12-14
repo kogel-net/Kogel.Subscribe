@@ -5,7 +5,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace Kogel.Slave.Mysql.Extension
+namespace System.Net.Security
 {
 #if NETSTANDARD2_0
 	public class SslClientAuthenticationOptions

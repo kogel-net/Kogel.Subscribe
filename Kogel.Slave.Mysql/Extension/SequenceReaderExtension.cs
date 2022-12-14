@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Buffers;
+using System.Buffers.Binary;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Kogel.Slave.Mysql.Extension
+namespace System.Buffers
 {
     /// <summary>
     /// 
