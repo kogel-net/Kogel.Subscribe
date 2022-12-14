@@ -59,7 +59,7 @@ namespace Kogel.Slave.Mysql
         public SlaveClient()
             : base(new LogEventPipelineFilter())
         {
-
+            
         }
 
         private Stream GetStreamFromMySQLConnection(MySqlConnection connection)
@@ -122,7 +122,7 @@ namespace Kogel.Slave.Mysql
             catch (Exception e)
             {
                 await mysqlConn.CloseAsync();
-
+                
                 return new LoginResult
                 {
                     Result = false,
@@ -136,7 +136,7 @@ namespace Kogel.Slave.Mysql
         {
             var cmd = mysqlConn.CreateCommand();
             cmd.CommandText = "SHOW MASTER STATUS;";
-
+            
             using (var reader = await cmd.ExecuteReaderAsync())
             {
                 if (!await reader.ReadAsync())
@@ -145,7 +145,7 @@ namespace Kogel.Slave.Mysql
                 var fileName = reader.GetString(0);
                 var position = reader.GetInt32(1);
 
-                reader.Close();
+                await reader.CloseAsync();
 
                 return new Tuple<string, int>(fileName, position);
             }
@@ -155,28 +155,28 @@ namespace Kogel.Slave.Mysql
         {
             var cmd = mysqlConn.CreateCommand();
             cmd.CommandText = "show global variables like 'binlog_checksum';";
-
+            
             using (var reader = await cmd.ExecuteReaderAsync())
             {
                 if (!await reader.ReadAsync())
                     return ChecksumType.NONE;
 
                 var checksumTypeName = reader.GetString(1).ToUpper();
-                reader.Close();
+                await reader.CloseAsync();
 
                 return (ChecksumType)Enum.Parse(typeof(ChecksumType), checksumTypeName);
             }
         }
 
 
-
+        
         private async ValueTask ConfirmChecksum(MySqlConnection mysqlConn)
         {
             var cmd = mysqlConn.CreateCommand();
-            cmd.CommandText = "set @`master_binlog_checksum` = @@binlog_checksum;";
+            cmd.CommandText = "set @`master_binlog_checksum` = @@binlog_checksum;";        
             await cmd.ExecuteNonQueryAsync();
         }
-
+        
 
         /*
         https://dev.mysql.com/doc/internals/en/com-binlog-dump.html
@@ -203,7 +203,7 @@ namespace Kogel.Slave.Mysql
 
             var nameSpan = n.Slice(4);
 
-            var len = fileName.Length; //encoding.GetBytes(fileName, nameSpan);
+            var len = encoding.GetBytes(fileName, nameSpan);
 
             len += fixPartSize;
 
@@ -212,17 +212,17 @@ namespace Kogel.Slave.Mysql
 
             var contentLen = len - 4;
 
-            buffer[0] = (byte)(contentLen & 0xff);
-            buffer[1] = (byte)(contentLen >> 8);
-            buffer[2] = (byte)(contentLen >> 16);
-
+            buffer[0] = (byte) (contentLen & 0xff);
+            buffer[1] = (byte) (contentLen >> 8);
+            buffer[2] = (byte) (contentLen >> 16);
+            
             return new Memory<byte>(buffer, 0, len);
         }
 
         private async ValueTask StartDumpBinlog(Stream stream, int serverId, string fileName, int position)
         {
             var data = GetDumpBinlogCommand(serverId, fileName, position);
-            stream.Write(data.ToArray(), 0, data.Length);
+            await stream.WriteAsync(data);
             await stream.FlushAsync();
         }
 

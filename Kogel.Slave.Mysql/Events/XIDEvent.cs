@@ -1,7 +1,6 @@
 using System;
 using System.Buffers;
 using System.Text;
-using Kogel.Slave.Mysql.Extension;
 using SuperSocket.ProtoBase;
 
 namespace Kogel.Slave.Mysql
@@ -12,7 +11,7 @@ namespace Kogel.Slave.Mysql
         
         protected internal override void DecodeBody(ref SequenceReader<byte> reader, object context)
         {
-            reader.TryReadLittleEndian(out short tarnsID);
+            reader.TryReadLittleEndian(out long tarnsID);
             TransactionID = tarnsID;
         }
     }

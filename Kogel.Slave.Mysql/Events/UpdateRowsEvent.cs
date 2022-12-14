@@ -1,4 +1,3 @@
-using Kogel.Slave.Mysql.Extension;
 using System;
 using System.Buffers;
 using System.Collections;

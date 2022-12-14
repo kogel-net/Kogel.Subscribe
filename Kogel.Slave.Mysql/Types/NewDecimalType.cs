@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Buffers;
 using System.Globalization;
-using Kogel.Slave.Mysql.Extension;
 
 namespace Kogel.Slave.Mysql
 {

@@ -24,8 +24,8 @@ namespace Kogel.Slave.Mysql
         private string ReadServerVersion(ref SequenceReader<byte> reader, int len)
         {
             ReadOnlySequence<byte> seq;
-          
-            if (reader.TryReadTo(out seq, BitConverter.GetBytes(0x00), false))
+            ReadOnlySpan<byte> delimiter = new[] { (byte)0x00 };
+            if (reader.TryReadTo(out seq, delimiter, false))
             {
                 if (seq.Length > len)                    
                 {

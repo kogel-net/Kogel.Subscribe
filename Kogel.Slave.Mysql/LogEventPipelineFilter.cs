@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers;
 using SuperSocket.ProtoBase;
-using Kogel.Slave.Mysql.Extension;
 
 namespace Kogel.Slave.Mysql
 {

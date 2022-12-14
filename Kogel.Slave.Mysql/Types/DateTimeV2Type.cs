@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Buffers;
-using Kogel.Slave.Mysql.Extension;
 
 namespace Kogel.Slave.Mysql
 {
@@ -10,6 +9,18 @@ namespace Kogel.Slave.Mysql
     {
         public object ReadValue(ref SequenceReader<byte> reader, int meta)
         {
+            /*
+            (in big endian)
+            1 bit sign (1= non-negative, 0= negative)
+            17 bits year*13+month (year 0-9999, month 0-12)
+            5 bits day (0-31)
+            5 bits hour (0-23)
+            6 bits minute (0-59)
+            6 bits second (0-59)
+            (5 bytes in total)
+            + fractional-seconds storage (size depends on meta)
+            */
+
             reader.TryReadBigEndian(out int totalValue0);
             reader.TryRead(out byte totalValue1);
 

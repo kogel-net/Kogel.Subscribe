@@ -1,4 +1,3 @@
-using Kogel.Slave.Mysql.Extension;
 using System.Buffers;
 
 namespace SuperSocket.ProtoBase

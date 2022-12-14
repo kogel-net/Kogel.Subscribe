@@ -1,4 +1,3 @@
-using Kogel.Slave.Mysql.Extension;
 using System;
 using System.Net;
 using System.Net.Security;
@@ -47,7 +46,7 @@ namespace SuperSocket.Client
 			try
 			{
 				SslStream stream = new SslStream(new NetworkStream(socket, ownsSocket: true), leaveInnerStreamOpen: false);
-				await stream.AuthenticateAsClientAsync(Options.TargetHost);
+				await stream.AuthenticateAsClientAsync(Options, cancellationToken);
 				if (cancellationToken.IsCancellationRequested)
 				{
 					return ConnectState.CancelledState;

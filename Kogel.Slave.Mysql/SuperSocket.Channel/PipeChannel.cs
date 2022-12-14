@@ -157,7 +157,7 @@ namespace SuperSocket.Channel
                         num = 4096;
                     }
                     Memory<byte> memory = writer.GetMemory(num);
-                    int num2 = FillPipeWithDataAsync(memory);
+                    int num2 = await FillPipeWithDataAsync(memory, cts.Token);
                     if (num2 == 0)
                     {
                         if (!base.CloseReason.HasValue)
@@ -212,7 +212,7 @@ namespace SuperSocket.Channel
             return false;
         }
 
-        protected abstract int FillPipeWithDataAsync(Memory<byte> memory);
+        protected abstract ValueTask<int> FillPipeWithDataAsync(Memory<byte> memory, CancellationToken cancellationToken);
 
         protected virtual async Task ProcessReads()
         {

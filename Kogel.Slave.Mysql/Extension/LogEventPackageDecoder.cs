@@ -1,4 +1,5 @@
-﻿using SuperSocket.ProtoBase;
+﻿using Kogel.Slave.Mysql;
+using SuperSocket.ProtoBase;
 using System;
 using System.Buffers;
 

@@ -2,7 +2,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using SuperSocket.ProtoBase;
-using Kogel.Slave.Mysql.Extension;
 
 namespace Kogel.Slave.Mysql
 {
@@ -60,7 +59,7 @@ namespace Kogel.Slave.Mysql
                 return errorLogEvent;
             }
 
-            reader.TryReadLittleEndian(out short seconds);
+            reader.TryReadLittleEndian(out int seconds);
             var timestamp = LogEvent.GetTimestampFromUnixEpoch(seconds);
 
             reader.TryRead(out byte eventTypeValue);
@@ -71,13 +70,13 @@ namespace Kogel.Slave.Mysql
             log.Timestamp = timestamp;
             log.EventType = eventType;
 
-            reader.TryReadLittleEndian(out short serverID);
+            reader.TryReadLittleEndian(out int serverID);
             log.ServerID = serverID;
 
-            reader.TryReadLittleEndian(out short eventSize);
+            reader.TryReadLittleEndian(out int eventSize);
             log.EventSize = eventSize;
 
-            reader.TryReadLittleEndian(out short position);
+            reader.TryReadLittleEndian(out int position);
             log.Position = position;
             
             reader.TryReadLittleEndian(out short flags);
