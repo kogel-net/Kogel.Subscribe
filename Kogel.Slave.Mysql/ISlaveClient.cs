@@ -7,7 +7,7 @@ namespace Kogel.Slave.Mysql
 {
     public interface ISlaveClient
     {
-        Task<LoginResult> ConnectAsync(string server, string username, string password, int serverId);
+        Task<LoginResult> ConnectAsync(ClientOptions options);
         ValueTask CloseAsync();
 
         event PackageHandler<LogEvent> PackageHandler;
