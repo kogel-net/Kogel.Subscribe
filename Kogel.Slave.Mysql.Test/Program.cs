@@ -29,6 +29,10 @@ namespace Kogel.Slave.Mysql.Test
                 Password = "123456"
             };
 
+            var connString = $"Server={options.Server}; UID={options.UserName}; Password={options.Password};Database=kogel_test;";
+            var conn = new MySqlConnection(connString);
+            var list = conn.QuerySet<usr_student>().ToList();
+
             client.PackageHandler += Client_PackageHandler;
 
             var result = await client.ConnectAsync(options);
@@ -39,7 +43,7 @@ namespace Kogel.Slave.Mysql.Test
                 return;
             }
 
-    
+
             Console.ReadLine();
 
             await client.CloseAsync();
@@ -48,7 +52,7 @@ namespace Kogel.Slave.Mysql.Test
 
         private static async ValueTask Client_PackageHandler(EasyClient<LogEvent> sender, LogEvent package)
         {
-          
+
 
             await Task.CompletedTask;
         }
@@ -61,5 +65,16 @@ namespace Kogel.Slave.Mysql.Test
 
     }
 
-   
+    public class usr_student
+    {
+        public int id { get; set; }
+
+        public string code { get; set; }
+
+        public string name { get; set; }
+
+        public DateTime create_time { get; set; }
+    }
+
+
 }

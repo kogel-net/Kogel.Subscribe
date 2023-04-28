@@ -17,12 +17,6 @@ namespace Kogel.Slave.Mysql
     {
         private const byte CMD_DUMP_BINLOG = 0x12;
 
-        private const int BIN_LOG_HEADER_SIZE = 4;
-
-        private const int BINLOG_DUMP_NON_BLOCK = 1;
-
-        private const int BINLOG_SEND_ANNOTATE_ROWS_EVENT = 2;
-
         private MySqlConnection _connection;
 
         private Stream _stream;
