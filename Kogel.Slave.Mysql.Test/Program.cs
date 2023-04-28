@@ -1,15 +1,6 @@
 ﻿using System;
 using Kogel.Dapper.Extension.MySql;
-using Kogel.Dapper.Extension;
 using MySql.Data.MySqlClient;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Channels;
-using System.IO;
-using System.Net.Security;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
-using Kogel.Slave.Mysql;
 using System.Threading.Tasks;
 using SuperSocket.Client;
 
@@ -26,7 +17,7 @@ namespace Kogel.Slave.Mysql.Test
             {
                 Server = "127.0.0.1",
                 UserName = "root",
-                Password = "123456"
+                Password = "123456",
             };
 
             var connString = $"Server={options.Server}; UID={options.UserName}; Password={options.Password};Database=kogel_test;";

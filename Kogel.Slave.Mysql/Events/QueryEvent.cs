@@ -1,7 +1,7 @@
 using System;
 using System.Buffers;
 using System.Text;
-using SuperSocket.ProtoBase;
+using Kogel.Slave.Mysql.Extensions;
 
 namespace Kogel.Slave.Mysql
 {
@@ -47,7 +47,7 @@ namespace Kogel.Slave.Mysql
 
         public override string ToString()
         {
-            return $"{EventType.ToString()}\r\nSlaveProxyID: {SlaveProxyID}\r\nExecutionTime: {ExecutionTime}\r\nErrorCode: {ErrorCode}\r\nStatusVars: {StatusVars}\r\nSchema: {Schema}\r\nQuery: {Query}";
+            return $"{EventType}\r\nSlaveProxyID: {SlaveProxyID}\r\nExecutionTime: {ExecutionTime}\r\nErrorCode: {ErrorCode}\r\nStatusVars: {StatusVars}\r\nSchema: {Schema}\r\nQuery: {Query}";
         }
     }
 }

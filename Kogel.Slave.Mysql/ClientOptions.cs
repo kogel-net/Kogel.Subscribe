@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Kogel.Slave.Mysql
+﻿namespace Kogel.Slave.Mysql
 {
     public class ClientOptions
     {
@@ -25,5 +21,11 @@ namespace Kogel.Slave.Mysql
         /// 如果为空时，自动设置一个可用的id
         /// </summary>
         public int? ServerId { get; set; }
+
+        /// <summary>
+        /// Mysql版本
+        /// </summary>
+        public Version? Version { get; set; }
     }
+
 }

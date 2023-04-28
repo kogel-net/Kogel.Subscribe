@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SuperSocket.ProtoBase;
+using Kogel.Slave.Mysql.Extensions;
 
 namespace Kogel.Slave.Mysql
 {
