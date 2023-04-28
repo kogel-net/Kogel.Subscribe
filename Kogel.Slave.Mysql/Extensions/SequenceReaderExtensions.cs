@@ -1,11 +1,12 @@
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using SuperSocket.ProtoBase;
 
-namespace Kogel.Slave.Mysql
+namespace Kogel.Slave.Mysql.Extensions
 {
     public static class SequenceReaderExtensions
     {
@@ -29,7 +30,7 @@ namespace Kogel.Slave.Mysql
                     reader.TryRead(out byte b);
                     SetBitArray(array, b, i, length);
                 }
-            }            
+            }
 
             return array;
         }
@@ -38,14 +39,14 @@ namespace Kogel.Slave.Mysql
         {
             for (var j = i * 8; j < Math.Min((i + 1) * 8, length); j++)
             {
-                if ((b & (0x01 << (j % 8))) != 0x00)
+                if ((b & 0x01 << j % 8) != 0x00)
                     array.Set(j, true);
             }
         }
 
         internal static string ReadString(ref this SequenceReader<byte> reader, Encoding encoding)
         {
-            return ReadString(ref reader, encoding, out long consumed);
+            return reader.ReadString(encoding, out long consumed);
         }
 
         internal static string ReadString(ref this SequenceReader<byte> reader, Encoding encoding, out long consumed)
@@ -71,24 +72,26 @@ namespace Kogel.Slave.Mysql
             }
         }
 
-        internal static string ReadString(ref this SequenceReader<byte> reader, long length = 0)
+        internal static string ReadString(ref this SequenceReader<byte> reader, long length = 0, bool isExcludeZero = false)
         {
-            return ReadString(ref reader, Encoding.UTF8, length);
+            return reader.ReadString(Encoding.UTF8, length, isExcludeZero);
         }
-        
-        internal static string ReadString(ref this SequenceReader<byte> reader, Encoding encoding, long length = 0)
+
+        internal static string ReadString(ref this SequenceReader<byte> reader, Encoding encoding, long length = 0, bool isExcludeZero = false)
         {
             if (length == 0 || reader.Remaining <= length)
-                return ReadString(ref reader, encoding);
+                return reader.ReadString(encoding);
 
             // reader.Remaining > length
-            var seq = reader.Sequence.Slice(reader.Consumed, length);            
-            var consumed = 0L;
-            
+            var sequence = reader.Sequence.Slice(reader.Consumed, length);
             try
             {
-                var subReader = new SequenceReader<byte>(seq);
-                return ReadString(ref subReader, encoding, out consumed);
+                if (isExcludeZero)
+                {
+                    sequence = ReadOnlySequenceExcludeZero(ref reader, sequence, ref length);
+                }
+                var subReader = new SequenceReader<byte>(sequence);
+                return subReader.ReadString(encoding, out long consumed);
             }
             finally
             {
@@ -96,11 +99,28 @@ namespace Kogel.Slave.Mysql
             }
         }
 
+        /// <summary>
+        /// 可能存在0的空值，排除0并往后偏移拿值
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="sequence"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        internal static ReadOnlySequence<byte> ReadOnlySequenceExcludeZero(ref this SequenceReader<byte> reader, ReadOnlySequence<byte> sequence, ref long length)
+        {
+            var bytArr = sequence.ToArray();
+            var newByts = bytArr.Where(x => x != 0).ToList();
+            var spliceSeq = reader.Sequence.Slice(reader.Consumed + length, length - newByts.Count);
+            length += length - newByts.Count;
+            newByts.AddRange(spliceSeq.ToArray());
+            return new ReadOnlySequence<byte>(newByts.ToArray());
+        }
+
         internal static int ReadInteger(ref this SequenceReader<byte> reader, int length)
         {
             if (length > 4)
                 throw new ArgumentException("Length cannot be more than 4.", nameof(length));
-    
+
             var unit = 1;
             var value = 0;
 
@@ -118,7 +138,7 @@ namespace Kogel.Slave.Mysql
         {
             if (length > 4)
                 throw new ArgumentException("Length cannot be more than 4.", nameof(length));
-    
+
             var unit = (int)Math.Pow(256, length - 1);
             var value = 0;
 
@@ -148,7 +168,7 @@ namespace Kogel.Slave.Mysql
 
         internal static string ReadLengthEncodedString(ref this SequenceReader<byte> reader)
         {
-            return ReadLengthEncodedString(ref reader, Encoding.UTF8);
+            return reader.ReadLengthEncodedString(Encoding.UTF8);
         }
 
         internal static string ReadLengthEncodedString(ref this SequenceReader<byte> reader, Encoding encoding)
@@ -161,7 +181,7 @@ namespace Kogel.Slave.Mysql
             if (len == 0)
                 return string.Empty;
 
-            return ReadString(ref reader, encoding, len);
+            return reader.ReadString(encoding, len);
         }
 
         internal static long ReadLengthEncodedInteger(ref this SequenceReader<byte> reader)
@@ -174,7 +194,7 @@ namespace Kogel.Slave.Mysql
             if (b0 == 0xFC) // 252
             {
                 reader.TryReadLittleEndian(out short shortValue);
-                return (long)shortValue;
+                return shortValue;
             }
 
             if (b0 == 0xFD) // 253
@@ -183,7 +203,7 @@ namespace Kogel.Slave.Mysql
                 reader.TryRead(out byte b2);
                 reader.TryRead(out byte b3);
 
-                return (long)(b1 + b2 * 256 + b3 * 256 * 256);
+                return b1 + b2 * 256 + b3 * 256 * 256;
             }
 
             if (b0 == 0xFE) // 254
@@ -192,7 +212,7 @@ namespace Kogel.Slave.Mysql
                 return longValue;
             }
 
-            return (long)b0;
+            return b0;
         }
     }
 }

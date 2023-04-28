@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Kogel.Slave.Mysql.Extensions;
 using SuperSocket.ProtoBase;
 
 namespace Kogel.Slave.Mysql

@@ -10,6 +10,7 @@ using SuperSocket.Client;
 using Kogel.Dapper.Extension;
 using System.Linq;
 using System.Data;
+using Kogel.Slave.Mysql.Extensions;
 
 namespace Kogel.Slave.Mysql
 {
@@ -74,6 +75,9 @@ namespace Kogel.Slave.Mysql
             await _connection.OpenAsync();
             try
             {
+                //检查mysql版本
+                await CheckVersion(options);
+
                 //获取binlog位置
                 var binlogInfo = await GetBinlogFileNameAndPosition();
                 //检查binlog
@@ -113,6 +117,20 @@ namespace Kogel.Slave.Mysql
                     Result = false,
                     Message = e.Message
                 };
+            }
+        }
+
+        private async Task CheckVersion(ClientOptions options)
+        {
+            if (options.Version == null)
+            {
+                string version = await _connection.ExecuteScalarAsync<string>("SELECT VERSION()");
+                Version versionType = version.StartsWith("8") ? Version.EightPlus : Version.FivePlus;
+                versionType.SetVersionEnvironmentVariable();
+            }
+            else 
+            {
+                options.Version.Value.SetVersionEnvironmentVariable();
             }
         }
 
