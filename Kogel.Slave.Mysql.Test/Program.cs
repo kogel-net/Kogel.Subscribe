@@ -22,7 +22,6 @@ namespace Kogel.Slave.Mysql.Test
 
             var connString = $"Server={options.Server}; UID={options.UserName}; Password={options.Password};Database=kogel_test;";
             var conn = new MySqlConnection(connString);
-            var list = conn.QuerySet<usr_student>().ToList();
 
             client.PackageHandler += Client_PackageHandler;
 

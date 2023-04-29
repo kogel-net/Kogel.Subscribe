@@ -78,6 +78,9 @@ namespace Kogel.Slave.Mysql
                 //检查mysql版本
                 await CheckVersion(options);
 
+                //检查binlog配置
+                await CheckBinLog();
+
                 //获取binlog位置
                 var binlogInfo = await GetBinlogFileNameAndPosition();
                 //检查binlog
@@ -128,18 +131,70 @@ namespace Kogel.Slave.Mysql
                 Version versionType = version.StartsWith("8") ? Version.EightPlus : Version.FivePlus;
                 versionType.SetVersionEnvironmentVariable();
             }
-            else 
+            else
             {
                 options.Version.Value.SetVersionEnvironmentVariable();
             }
         }
 
+        private async Task CheckBinLog()
+        {
+            //check binlog open
+            var logBinVars = await _connection.QueryFirstOrDefaultAsync<Variables>("SHOW VARIABLES LIKE 'log_bin'");
+            if (logBinVars.Value != "ON")
+            {
+                throw new Exception("Confirm whether binlog is open!");
+            }
+            var binLogVars = await _connection.QueryAsync<Variables>("SHOW GLOBAL VARIABLES like \"binlog%\"");
+            if (binLogVars.Any())
+            {
+                foreach (var binLogVarsItem in binLogVars)
+                {
+                    await CheckBinLogConfig(binLogVarsItem);
+                }
+            }
+        }
+
+        private async Task CheckBinLogConfig(Variables variables)
+        {
+            switch (variables.Variable_name)
+            {
+                case "binlog_format":
+                    await CheckBinlogFormat(variables);
+                    break;
+
+                case "binlog_row_metadata":
+                    await CheckBinlogRowMetaData(variables);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private async Task CheckBinlogFormat(Variables variables)
+        {
+            if (variables.Value!="ROW")
+            {
+                await _connection.ExecuteAsync("SET GLOBAL binlog_format = 'ROW'");
+            }
+        }
+
+        private async Task CheckBinlogRowMetaData(Variables variables)
+        {
+            if (variables.Value!="FULL")
+            {
+                await _connection.ExecuteAsync("SET GLOBAL binlog_format = 'FULL'");
+            }
+        }
+
+
         private async Task CheckServerId(ClientOptions options)
         {
             if (!options.ServerId.HasValue)
             {
-                var variables = await _connection.QueryAsync<Variables>("show variables like 'server_id'");
-                options.ServerId = variables.Any() ? variables.Max(x => x.Value) + 1 : 2;
+                var variables = await _connection.QueryAsync<Variables>("SHOW VARIABLES LIKE 'server_id'");
+                options.ServerId = variables.Any() ? variables.Max(x => Convert.ToInt32(x.Value)) + 1 : 2;
             }
         }
 

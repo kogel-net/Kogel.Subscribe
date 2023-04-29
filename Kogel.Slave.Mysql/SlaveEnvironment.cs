@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Kogel.Slave.Mysql.Extensions;
+using System;
 
-namespace Kogel.Slave.Mysql.Extensions
+namespace Kogel.Slave.Mysql
 {
-    public static class EnvironmentExtensions
+    internal static class SlaveEnvironment
     {
         private static Version? _version;
 

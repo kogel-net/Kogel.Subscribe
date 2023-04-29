@@ -23,12 +23,12 @@ namespace Kogel.Slave.Mysql
 
         public byte[] ColumnTypes { get; set; }
 
-        public int[] ColumnMetadata { get; set; }        
-        
+        public int[] ColumnMetadata { get; set; }
+
         public BitArray NullBitmap { get; set; }
 
         public TableMetadata Metadata { get; set; }
-        
+
         public TableMapEvent()
         {
             HasCRC = true;
@@ -58,7 +58,7 @@ namespace Kogel.Slave.Mysql
             reader.ReadLengthEncodedInteger();
 
             ColumnMetadata = ReadColumnMetadata(ref reader, ColumnTypes);
-            
+
             NullBitmap = reader.ReadBitArray(ColumnCount);
 
             RebuildReaderAsCRC(ref reader);
@@ -73,7 +73,7 @@ namespace Kogel.Slave.Mysql
 
         public override string ToString()
         {
-            return $"{EventType.ToString()}\r\nTableID: {TableID}\r\nSchemaName: {SchemaName}\r\nTableName: {TableName}\r\nColumnCount: {ColumnCount}";
+            return $"{EventType}\r\nTableID: {TableID}\r\nSchemaName: {SchemaName}\r\nTableName: {TableName}\r\nColumnCount: {ColumnCount}";
         }
 
         private int[] ReadColumnMetadata(ref SequenceReader<byte> reader, byte[] columnTypes)
@@ -82,7 +82,7 @@ namespace Kogel.Slave.Mysql
 
             for (int i = 0; i < columnTypes.Length; i++)
             {
-                switch((ColumnType)columnTypes[i])
+                switch ((ColumnType)columnTypes[i])
                 {
                     case ColumnType.FLOAT:
                     case ColumnType.DOUBLE:
@@ -145,10 +145,10 @@ namespace Kogel.Slave.Mysql
                 reader.TryRead(out byte filedTypeCode);
 
                 var fieldType = (MetadataFieldType)filedTypeCode;
-                var length = reader.ReadLengthEncodedInteger();        
+                var length = reader.ReadLengthEncodedInteger();
 
                 var subReader = new SequenceReader<byte>(reader.Sequence.Slice(reader.Consumed, length));
-                
+
                 try
                 {
                     ReadMetadataField(ref subReader, fieldType, metadata, numericColumnCount);
@@ -158,7 +158,6 @@ namespace Kogel.Slave.Mysql
                     reader.Advance(length);
                 }
             }
-
             return metadata;
         }
 
@@ -218,7 +217,7 @@ namespace Kogel.Slave.Mysql
         private List<string[]> ReadTypeValues(ref SequenceReader<byte> reader)
         {
             var result = new List<string[]>();
-            
+
             while (reader.Remaining > 0)
             {
                 int valuesCount = (int)reader.ReadLengthEncodedInteger();
@@ -275,7 +274,7 @@ namespace Kogel.Slave.Mysql
         {
             var charset = new DefaultCharset();
             charset.DefaultCharsetCollation = (int)reader.ReadLengthEncodedInteger();
-            
+
             var dict = ReadIntegerDictionary(ref reader);
 
             if (dict.Count > 0)
