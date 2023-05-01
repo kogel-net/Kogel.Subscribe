@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Kogel.Slave.Mysql.Extensions;
+using Kogel.Slave.Mysql.Mysql;
 
 namespace Kogel.Slave.Mysql
 {
@@ -209,6 +210,10 @@ namespace Kogel.Slave.Mysql
                     metadata.EnumAndSetColumnCharsets = ReadIntegers(ref subReader);
                     break;
 
+                case MetadataFieldType.COMPRESSION_REQUEST:
+                    //—πÀı«Î«Û
+                    break;
+
                 default:
                     throw new Exception("Unsupported table metadata field type: " + fieldType);
             }
@@ -297,7 +302,8 @@ namespace Kogel.Slave.Mysql
             SIMPLE_PRIMARY_KEY = 8,              // The primary key without any prefix
             PRIMARY_KEY_WITH_PREFIX = 9,         // The primary key with some prefix
             ENUM_AND_SET_DEFAULT_CHARSET = 10,   // Charsets of ENUM and SET columns
-            ENUM_AND_SET_COLUMN_CHARSET = 11    // Charsets of ENUM and SET columns
+            ENUM_AND_SET_COLUMN_CHARSET = 11,    // Charsets of ENUM and SET columns
+            COMPRESSION_REQUEST = 12             // The data compression request
         }
 
     }

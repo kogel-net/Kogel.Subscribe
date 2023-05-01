@@ -140,12 +140,12 @@ namespace Kogel.Slave.Mysql
         private async Task CheckBinLog()
         {
             //check binlog open
-            var logBinVars = await _connection.QueryFirstOrDefaultAsync<Variables>("SHOW VARIABLES LIKE 'log_bin'");
+            var logBinVars = await _connection.QueryFirstOrDefaultAsync<Variables>("SHOW GLOBAL VARIABLES LIKE 'log_bin'");
             if (logBinVars.Value != "ON")
             {
                 throw new Exception("Confirm whether binlog is open!");
             }
-            var binLogVars = await _connection.QueryAsync<Variables>("SHOW GLOBAL VARIABLES like \"binlog%\"");
+            var binLogVars = await _connection.QueryAsync<Variables>("SHOW GLOBAL VARIABLES like 'binlog%'");
             if (binLogVars.Any())
             {
                 foreach (var binLogVarsItem in binLogVars)
@@ -172,9 +172,10 @@ namespace Kogel.Slave.Mysql
             }
         }
 
+        /*mysql binlog 分为三种模式（STATEMENT，ROW，MIXED），最少需要使用到 ROW*/
         private async Task CheckBinlogFormat(Variables variables)
         {
-            if (variables.Value!="ROW")
+            if (variables.Value != "ROW" && variables.Value != "MIXED")
             {
                 await _connection.ExecuteAsync("SET GLOBAL binlog_format = 'ROW'");
             }
@@ -182,12 +183,11 @@ namespace Kogel.Slave.Mysql
 
         private async Task CheckBinlogRowMetaData(Variables variables)
         {
-            if (variables.Value!="FULL")
+            if (variables.Value != "FULL")
             {
-                await _connection.ExecuteAsync("SET GLOBAL binlog_format = 'FULL'");
+                await _connection.ExecuteAsync("SET GLOBAL binlog_row_metadata = 'FULL'");
             }
         }
-
 
         private async Task CheckServerId(ClientOptions options)
         {
