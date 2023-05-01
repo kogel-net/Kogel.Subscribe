@@ -211,11 +211,13 @@ namespace Kogel.Slave.Mysql
                     break;
 
                 case MetadataFieldType.COMPRESSION_REQUEST:
-                    //压缩请求
+                    /*压缩请求，可以不用处理*/
                     break;
 
                 default:
-                    throw new Exception("Unsupported table metadata field type: " + fieldType);
+                    /*other*/
+                    break;
+                    //throw new Exception("Unsupported table metadata field type: " + fieldType);
             }
         }
 
