@@ -16,11 +16,12 @@ namespace Kogel.Slave.Mysql.Test
             var options = new ClientOptions
             {
                 Server = "127.0.0.1",
+                Port = 3307,
                 UserName = "root",
                 Password = "123456",
             };
 
-            var connString = $"Server={options.Server}; UID={options.UserName}; Password={options.Password};Database=kogel_test;";
+            var connString = $"Server={options.Server};PORT={options.Port}; UID={options.UserName}; Password={options.Password};Database=kogel_test;";
             var conn = new MySqlConnection(connString);
 
             client.PackageHandler += Client_PackageHandler;

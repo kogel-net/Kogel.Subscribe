@@ -70,7 +70,7 @@ namespace Kogel.Slave.Mysql
 
         public async Task<LoginResult> ConnectAsync(ClientOptions options)
         {
-            var connString = $"Server={options.Server}; UID={options.UserName}; Password={options.Password}";
+            var connString = $"Server={options.Server};PORT={options.Port}; UID={options.UserName}; Password={options.Password}";
             _connection = new MySqlConnection(connString);
             await _connection.OpenAsync();
             try

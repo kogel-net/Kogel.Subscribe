@@ -8,6 +8,11 @@
         public string Server { get; set; }
 
         /// <summary>
+        /// 端口
+        /// </summary>
+        public int Port { get; set; } = 3306;
+
+        /// <summary>
         /// 用户名
         /// </summary>
         public string UserName { get; set; }
