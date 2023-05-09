@@ -18,7 +18,9 @@ namespace Kogel.Slave.Mysql
     {
         private const byte CMD_DUMP_BINLOG = 0x12;
 
-        private MySqlConnection _connection;
+        private readonly MySqlConnection _connection;
+
+        private readonly ClientOptions _options;
 
         private Stream _stream;
 
@@ -26,6 +28,12 @@ namespace Kogel.Slave.Mysql
         {
             get { return base.Logger; }
             set { base.Logger = value; }
+        }
+
+        public SlaveClient(ClientOptions options) : base(new LogEventPipelineFilter())
+        {
+            _options = options;
+            _connection = _options.GetConnection();
         }
 
         static SlaveClient()
@@ -52,31 +60,13 @@ namespace Kogel.Slave.Mysql
             LogEventPackageDecoder.RegisterLogEventType<XIDEvent>(LogEventType.XID_EVENT);
         }
 
-        public SlaveClient()
-            : base(new LogEventPipelineFilter())
+        public async Task<LoginResult> ConnectAsync()
         {
-
-        }
-
-        private Stream GetStreamFromMySQLConnection()
-        {
-            var driverField = _connection.GetType().GetField("driver", BindingFlags.Instance | BindingFlags.NonPublic);
-            var driver = driverField.GetValue(_connection);
-            var handlerField = driver.GetType().GetField("handler", BindingFlags.Instance | BindingFlags.NonPublic);
-            var handler = handlerField.GetValue(driver);
-            var baseStreamField = handler.GetType().GetField("baseStream", BindingFlags.Instance | BindingFlags.NonPublic);
-            return baseStreamField.GetValue(handler) as Stream;
-        }
-
-        public async Task<LoginResult> ConnectAsync(ClientOptions options)
-        {
-            var connString = $"Server={options.Server};PORT={options.Port}; UID={options.UserName}; Password={options.Password}";
-            _connection = new MySqlConnection(connString);
             await _connection.OpenAsync();
             try
             {
                 //检查mysql版本
-                await CheckVersion(options);
+                await CheckVersion();
 
                 //检查binlog配置
                 await CheckBinLog();
@@ -91,10 +81,10 @@ namespace Kogel.Slave.Mysql
                 _stream = GetStreamFromMySQLConnection();
 
                 //检查ServerId
-                await CheckServerId(options);
+                await CheckServerId();
 
                 //发送dump到master
-                await StartDumpBinlog(_stream, options.ServerId.Value, binlogInfo.Item1, binlogInfo.Item2);
+                await StartDumpBinlog(_stream, binlogInfo.Item1, binlogInfo.Item2);
 
                 //设置频道
                 SetupChannel(new StreamPipeChannel<LogEvent>(_stream, null,
@@ -123,17 +113,13 @@ namespace Kogel.Slave.Mysql
             }
         }
 
-        private async Task CheckVersion(ClientOptions options)
+        private async Task CheckVersion()
         {
-            if (options.Version == null)
+            if (_options.Version == null)
             {
-                string version = await _connection.ExecuteScalarAsync<string>("SELECT VERSION()");
-                Version versionType = version.StartsWith("8") ? Version.EightPlus : Version.FivePlus;
-                versionType.SetVersionEnvironmentVariable();
-            }
-            else
-            {
-                options.Version.Value.SetVersionEnvironmentVariable();
+                string versionStr = await _connection.ExecuteScalarAsync<string>("SELECT VERSION()");
+                Version version = versionStr.StartsWith("8") ? Version.EightPlus : Version.FivePlus;
+                _options.Version = version;
             }
         }
 
@@ -172,7 +158,11 @@ namespace Kogel.Slave.Mysql
             }
         }
 
-        /*mysql binlog 分为三种模式（STATEMENT，ROW，MIXED），最少需要使用到 ROW*/
+        /// <summary>
+        /// mysql binlog 分为三种模式（STATEMENT，ROW，MIXED），最少需要使用到 ROW
+        /// </summary>
+        /// <param name="variables"></param>
+        /// <returns></returns>
         private async Task CheckBinlogFormat(Variables variables)
         {
             if (variables.Value != "ROW" && variables.Value != "MIXED")
@@ -181,6 +171,11 @@ namespace Kogel.Slave.Mysql
             }
         }
 
+        /// <summary>
+        /// 8.0+版本以下不支持
+        /// </summary>
+        /// <param name="variables"></param>
+        /// <returns></returns>
         private async Task CheckBinlogRowMetaData(Variables variables)
         {
             if (variables.Value != "FULL")
@@ -189,12 +184,12 @@ namespace Kogel.Slave.Mysql
             }
         }
 
-        private async Task CheckServerId(ClientOptions options)
+        private async Task CheckServerId()
         {
-            if (!options.ServerId.HasValue)
+            if (!_options.ServerId.HasValue)
             {
                 var variables = await _connection.QueryAsync<Variables>("SHOW VARIABLES LIKE 'server_id'");
-                options.ServerId = variables.Any() ? variables.Max(x => Convert.ToInt32(x.Value)) + 1 : 2;
+                _options.ServerId = variables.Any() ? variables.Max(x => Convert.ToInt32(x.Value)) + 1 : 2;
             }
         }
 
@@ -242,6 +237,16 @@ namespace Kogel.Slave.Mysql
             await cmd.ExecuteNonQueryAsync();
         }
 
+        private Stream GetStreamFromMySQLConnection()
+        {
+            var driverField = _connection.GetType().GetField("driver", BindingFlags.Instance | BindingFlags.NonPublic);
+            var driver = driverField.GetValue(_connection);
+            var handlerField = driver.GetType().GetField("handler", BindingFlags.Instance | BindingFlags.NonPublic);
+            var handler = handlerField.GetValue(driver);
+            var baseStreamField = handler.GetType().GetField("baseStream", BindingFlags.Instance | BindingFlags.NonPublic);
+            return baseStreamField.GetValue(handler) as Stream;
+        }
+
         /*
         https://dev.mysql.com/doc/internals/en/com-binlog-dump.html
         */
@@ -283,9 +288,9 @@ namespace Kogel.Slave.Mysql
             return new Memory<byte>(buffer, 0, len);
         }
 
-        private async ValueTask StartDumpBinlog(Stream stream, int serverId, string fileName, int position)
+        private async ValueTask StartDumpBinlog(Stream stream, string fileName, int position)
         {
-            var data = GetDumpBinlogCommand(serverId, fileName, position);
+            var data = GetDumpBinlogCommand(_options.ServerId.Value, fileName, position);
             await stream.WriteAsync(data);
             await stream.FlushAsync();
         }
@@ -293,13 +298,11 @@ namespace Kogel.Slave.Mysql
         public override async ValueTask CloseAsync()
         {
             var connection = _connection;
-
             if (connection != null)
             {
-                _connection = null;
                 await connection.CloseAsync();
+                await connection.DisposeAsync();
             }
-
             await base.CloseAsync();
         }
     }

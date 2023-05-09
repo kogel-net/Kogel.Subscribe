@@ -25,8 +25,8 @@ namespace Kogel.Slave.Mysql
             DataTypes[(int)ColumnType.TINY] = new TinyType();
             DataTypes[(int)ColumnType.SHORT] = new ShortType();
             DataTypes[(int)ColumnType.INT24] = new Int24Type();
-            DataTypes[(int)ColumnType.LONG] = new LongType();
-            DataTypes[(int)ColumnType.LONGLONG] = new LongLongType();
+            DataTypes[(int)ColumnType.INT32] = new Int32Type();
+            DataTypes[(int)ColumnType.BIGINT] = new BigIntType();
             DataTypes[(int)ColumnType.FLOAT] = new FloatType();
             DataTypes[(int)ColumnType.DOUBLE] = new DoubleType();
             DataTypes[(int)ColumnType.NEWDECIMAL] = new NewDecimalType();
@@ -35,6 +35,7 @@ namespace Kogel.Slave.Mysql
             DataTypes[(int)ColumnType.VARCHAR] = new VarCharType();
             DataTypes[(int)ColumnType.DATETIME] = new DateTimeType();
             DataTypes[(int)ColumnType.DATETIME_V2] = new DateTimeV2Type();
+            DataTypes[(int)ColumnType.JSON] = new JsonType();
         }
 
         protected internal abstract void DecodeBody(ref SequenceReader<byte> reader, object context);

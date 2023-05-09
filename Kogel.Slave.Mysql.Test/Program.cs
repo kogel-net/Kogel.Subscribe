@@ -3,6 +3,7 @@ using Kogel.Dapper.Extension.MySql;
 using MySql.Data.MySqlClient;
 using System.Threading.Tasks;
 using SuperSocket.Client;
+using Kogel.Dapper.Extension.Core.SetQ;
 
 namespace Kogel.Slave.Mysql.Test
 {
@@ -12,21 +13,18 @@ namespace Kogel.Slave.Mysql.Test
         {
             Console.WriteLine("Hello World!");
 
-            var client = new SlaveClient();
             var options = new ClientOptions
             {
                 Server = "127.0.0.1",
                 Port = 3307,
                 UserName = "root",
-                Password = "123456",
+                Password = "123456"
             };
-
-            var connString = $"Server={options.Server};PORT={options.Port}; UID={options.UserName}; Password={options.Password};Database=kogel_test;";
-            var conn = new MySqlConnection(connString);
+            string sql = options.GetConnectionString();
+            var client = new SlaveClient(options);
 
             client.PackageHandler += Client_PackageHandler;
-
-            var result = await client.ConnectAsync(options);
+            var result = await client.ConnectAsync();
 
             if (!result.Result)
             {
@@ -34,38 +32,23 @@ namespace Kogel.Slave.Mysql.Test
                 return;
             }
 
-
             Console.ReadLine();
-
             await client.CloseAsync();
-
         }
 
         private static async ValueTask Client_PackageHandler(EasyClient<LogEvent> sender, LogEvent package)
         {
+            Type eventType = package.GetType();
+            if (eventType.Equals(typeof(UpdateRowsEvent)))
+            {
 
+            }
+            else if (eventType.Equals(typeof(RowsEvent)))
+            {
+
+            }
 
             await Task.CompletedTask;
         }
-
-
-
-
-
-
-
     }
-
-    public class usr_student
-    {
-        public int id { get; set; }
-
-        public string code { get; set; }
-
-        public string name { get; set; }
-
-        public DateTime create_time { get; set; }
-    }
-
-
 }

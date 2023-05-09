@@ -1,4 +1,6 @@
-﻿namespace Kogel.Slave.Mysql
+﻿using MySql.Data.MySqlClient;
+
+namespace Kogel.Slave.Mysql
 {
     public class ClientOptions
     {
@@ -31,6 +33,16 @@
         /// Mysql版本
         /// </summary>
         public Version? Version { get; set; }
-    }
 
+        public string GetConnectionString()
+        {
+            return $"Server={Server};PORT={Port}; UID={UserName}; Password={Password}";
+        }
+
+        public MySqlConnection GetConnection()
+        {
+            string connString = GetConnectionString();
+            return new MySqlConnection(connString);
+        }
+    }
 }

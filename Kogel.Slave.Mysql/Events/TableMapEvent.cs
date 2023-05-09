@@ -124,8 +124,8 @@ namespace Kogel.Slave.Mysql
                 case ColumnType.TINY:
                 case ColumnType.SHORT:
                 case ColumnType.INT24:
-                case ColumnType.LONG:
-                case ColumnType.LONGLONG:
+                case ColumnType.INT32:
+                case ColumnType.BIGINT:
                 case ColumnType.NEWDECIMAL:
                 case ColumnType.FLOAT:
                 case ColumnType.DOUBLE:

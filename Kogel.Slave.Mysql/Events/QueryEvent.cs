@@ -25,7 +25,9 @@ namespace Kogel.Slave.Mysql
             SlaveProxyID = slaveProxyID;
 
             reader.TryReadLittleEndian(out int seconds);
-            ExecutionTime = LogEvent.GetTimestampFromUnixEpoch(seconds);
+            //ExecutionTime = LogEvent.GetTimestampFromUnixEpoch(seconds);
+            //Timestamp utc time
+            ExecutionTime = Timestamp.AddHours(8);
 
             reader.TryRead(out byte schemaLen);
 

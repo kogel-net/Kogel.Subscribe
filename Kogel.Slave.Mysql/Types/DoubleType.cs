@@ -1,6 +1,4 @@
 using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Buffers;
 using Kogel.Slave.Mysql.Extensions;
 
@@ -10,7 +8,8 @@ namespace Kogel.Slave.Mysql
     {
         public object ReadValue(ref SequenceReader<byte> reader, int meta)
         {
-            return BitConverter.Int64BitsToDouble(reader.ReadLong(8));
+            byte[] bytes = reader.ReadByteArray(8);
+            return BitConverter.ToDouble(bytes, 0);
         }
     }
 }

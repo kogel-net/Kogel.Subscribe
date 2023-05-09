@@ -5,9 +5,9 @@ namespace Kogel.Slave.Mysql
     public enum Version
     {
         [Description("5.0+")]
-        FivePlus,
+        FivePlus = 5,
 
         [Description("8.0+")]
-        EightPlus
+        EightPlus = 8
     }
 }

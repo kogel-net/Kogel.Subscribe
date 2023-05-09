@@ -11,7 +11,7 @@ namespace Kogel.Slave.Mysql
         {
             if (SlaveEnvironment.GetVersionEnvironmentVariable() == Version.EightPlus)
             {
-                var length = reader.ReadInteger(1);
+                var length = reader.ReadInteger(meta);
                 string value = reader.ReadString(length, isExcludeZero: true);
                 return value;       
             }

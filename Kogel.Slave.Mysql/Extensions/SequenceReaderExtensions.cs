@@ -44,6 +44,19 @@ namespace Kogel.Slave.Mysql.Extensions
             }
         }
 
+        internal static byte[] ReadByteArray(ref this SequenceReader<byte> reader, int length)
+        {
+            byte[] byteArray = new byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                if (reader.TryRead(out byte value))
+                {
+                    byteArray[i] = value;
+                }
+            }
+            return byteArray;
+        }
+
         internal static string ReadString(ref this SequenceReader<byte> reader, Encoding encoding)
         {
             return reader.ReadString(encoding, out long consumed);

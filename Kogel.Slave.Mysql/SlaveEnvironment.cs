@@ -1,5 +1,4 @@
-﻿using Kogel.Slave.Mysql.Extensions;
-using System;
+﻿using System;
 
 namespace Kogel.Slave.Mysql
 {
@@ -11,17 +10,16 @@ namespace Kogel.Slave.Mysql
         {
             if (!_version.HasValue)
             {
-                var versionDesc = Environment.GetEnvironmentVariable("mysql-v");
-                _version = EnumExtensions.GetEnumValueFromDescription<Version>(versionDesc);
+                var version = Environment.GetEnvironmentVariable(key);
+                _version = (Version)Convert.ToInt32(version);
             }
             return _version.Value;
         }
 
-        public static void SetVersionEnvironmentVariable(this Version version)
+        public static void SetVersionEnvironmentVariable(this Version version, string key = "mysql-v")
         {
             _version = version;
-            string versionDesc = version.GetDescription();
-            Environment.SetEnvironmentVariable("mysql-v", versionDesc);
+            Environment.SetEnvironmentVariable(key, version.ToString());
         }
     }
 }

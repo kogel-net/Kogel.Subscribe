@@ -15,14 +15,14 @@ namespace Kogel.Slave.Mysql.Cdc
 
         public CdcSlaveClient(CdcClientOptions options)
         {
-            _slaveClient = new SlaveClient();
+            _slaveClient = new SlaveClient(options);
             _options = options;
         }
 
         public async Task ConnectAsync()
         {
             _slaveClient.PackageHandler += CdcPackageHandler;
-            await _slaveClient.ConnectAsync(_options);
+            await _slaveClient.ConnectAsync();
         }
 
         public async ValueTask DisposeAsync()
