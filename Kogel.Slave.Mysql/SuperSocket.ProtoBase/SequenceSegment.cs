@@ -3,7 +3,6 @@ using System.Buffers;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public class SequenceSegment : ReadOnlySequenceSegment<byte>, IDisposable
 	{
 		private bool disposedValue;

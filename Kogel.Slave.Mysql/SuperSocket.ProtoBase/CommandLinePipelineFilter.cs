@@ -2,7 +2,6 @@ using System;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public class CommandLinePipelineFilter : TerminatorPipelineFilter<StringPackageInfo>
 	{
 		public CommandLinePipelineFilter()

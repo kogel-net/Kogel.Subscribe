@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 
 namespace SuperSocket.Channel
 {
-
 	public static class Extensions
 	{
 		public static IAsyncEnumerator<TPackageInfo> GetPackageStream<TPackageInfo>(this IChannel<TPackageInfo> channel) where TPackageInfo : class

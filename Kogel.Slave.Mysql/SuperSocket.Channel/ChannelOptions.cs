@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 
 namespace SuperSocket.Channel
 {
-
 	public class ChannelOptions
 	{
 		public int MaxPackageLength { get; set; } = 1048576;

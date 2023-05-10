@@ -6,7 +6,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Client
 {
-
 	public interface IEasyClient<TReceivePackage, TSendPackage> : IEasyClient<TReceivePackage> where TReceivePackage : class
 	{
 		ValueTask SendAsync(TSendPackage package);

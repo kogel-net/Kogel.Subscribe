@@ -1,7 +1,5 @@
 ﻿using System.Buffers;
 using Kogel.Slave.Mysql.Extensions;
-using System.Text;
-using System;
 
 namespace Kogel.Slave.Mysql
 {

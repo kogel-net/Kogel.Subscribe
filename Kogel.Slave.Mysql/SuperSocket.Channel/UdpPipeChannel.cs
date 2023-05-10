@@ -9,7 +9,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Channel
 {
-
 	public class UdpPipeChannel<TPackageInfo> : VirtualChannel<TPackageInfo>, IChannelWithSessionIdentifier
 	{
 		private Socket _socket;

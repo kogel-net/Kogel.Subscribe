@@ -7,7 +7,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Channel
 {
-
 	public class RelayPipeChannel<TPackageInfo> : PipeChannel<TPackageInfo> where TPackageInfo : class
 	{
 		private static ChannelOptions RebuildOptionsWithPipes(ChannelOptions options, Pipe pipeIn, Pipe pipeOut)

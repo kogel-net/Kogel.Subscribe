@@ -2,7 +2,6 @@ using System.Buffers;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public abstract class PipelineFilterBase<TPackageInfo> : IPipelineFilter<TPackageInfo>, IPipelineFilter where TPackageInfo : class
 	{
 		public IPipelineFilter<TPackageInfo> NextFilter { get; protected set; }

@@ -5,7 +5,6 @@ using System.Threading.Tasks.Sources;
 
 namespace SuperSocket.Channel
 {
-
 	internal class DefaultObjectPipe<T> : IObjectPipe<T>, IValueTaskSource<T>, IDisposable
 	{
 		private class BufferSegment

@@ -2,7 +2,6 @@ using System.Buffers;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public abstract class FixedHeaderPipelineFilter<TPackageInfo> : FixedSizePipelineFilter<TPackageInfo> where TPackageInfo : class
 	{
 		private bool _foundHeader;

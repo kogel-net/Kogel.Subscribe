@@ -4,7 +4,6 @@ using System.Text;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public static class Extensions
 	{
 		public static string ReadString(this ref SequenceReader<byte> reader, long length = 0L)

@@ -3,7 +3,6 @@ using System.Buffers;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public abstract class BeginEndMarkPipelineFilter<TPackageInfo> : PipelineFilterBase<TPackageInfo> where TPackageInfo : class
 	{
 		private readonly ReadOnlyMemory<byte> _beginMark;

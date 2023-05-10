@@ -4,7 +4,6 @@ using System.Text;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public class TerminatorTextPipelineFilter : TerminatorPipelineFilter<TextPackageInfo>
 	{
 		public TerminatorTextPipelineFilter(ReadOnlyMemory<byte> terminator)

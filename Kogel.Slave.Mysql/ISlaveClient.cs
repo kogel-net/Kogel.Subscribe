@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using SuperSocket.Client;
 
 namespace Kogel.Slave.Mysql

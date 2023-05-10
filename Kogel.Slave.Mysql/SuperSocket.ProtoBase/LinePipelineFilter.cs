@@ -4,7 +4,6 @@ using System.Text;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public class LinePipelineFilter : TerminatorPipelineFilter<TextPackageInfo>
 	{
 		protected Encoding Encoding { get; private set; }

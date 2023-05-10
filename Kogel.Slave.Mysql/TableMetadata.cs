@@ -1,8 +1,5 @@
-using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections;
-using System.Text;
 
 namespace Kogel.Slave.Mysql
 {

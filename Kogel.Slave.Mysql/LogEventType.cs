@@ -1,5 +1,3 @@
-using System;
-
 namespace Kogel.Slave.Mysql
 {
     /*

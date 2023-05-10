@@ -2,7 +2,6 @@ using System.Buffers;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public class FixedSizePipelineFilter<TPackageInfo> : PipelineFilterBase<TPackageInfo> where TPackageInfo : class
 	{
 		private int _size;

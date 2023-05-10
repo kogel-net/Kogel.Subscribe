@@ -1,6 +1,5 @@
 namespace SuperSocket.Channel
 {
-
 	public enum CloseReason
 	{
 		Unknown,

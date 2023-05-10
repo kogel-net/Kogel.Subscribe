@@ -4,7 +4,6 @@ using System.Threading.Tasks.Sources;
 
 namespace SuperSocket.Channel
 {
-
 	internal class DefaultObjectPipeWithSupplyControl<T> : DefaultObjectPipe<T>, IValueTaskSource, ISupplyController
 	{
 		private ManualResetValueTaskSourceCore<bool> _taskSourceCore;

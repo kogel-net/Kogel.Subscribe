@@ -2,7 +2,6 @@ using System;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public class DelegatePipelineFilterFactory<TPackageInfo> : PipelineFilterFactoryBase<TPackageInfo>
 	{
 		private readonly Func<object, IPipelineFilter<TPackageInfo>> _factory;

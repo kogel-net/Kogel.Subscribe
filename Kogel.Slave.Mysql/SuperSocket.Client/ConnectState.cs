@@ -6,7 +6,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Client
 {
-
 	public class ConnectState
 	{
 		public static readonly ConnectState CancelledState = new ConnectState(cancelled: false);

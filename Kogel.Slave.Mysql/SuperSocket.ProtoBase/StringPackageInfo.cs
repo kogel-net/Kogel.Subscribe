@@ -1,6 +1,5 @@
 namespace SuperSocket.ProtoBase
 {
-
 	public class StringPackageInfo : IKeyedPackageInfo<string>, IStringPackage
 	{
 		public string Key { get; set; }

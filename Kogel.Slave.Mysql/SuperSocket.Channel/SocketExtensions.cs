@@ -2,7 +2,6 @@ using System.Net.Sockets;
 
 namespace SuperSocket.Channel
 {
-
 	public static class SocketExtensions
 	{
 		public static bool IsIgnorableSocketException(this SocketException se)

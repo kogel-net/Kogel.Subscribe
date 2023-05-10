@@ -8,7 +8,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Channel
 {
-
 	public abstract class ChannelBase<TPackageInfo> : IChannel<TPackageInfo>, IChannel
 	{
 		public bool IsClosed { get; private set; }

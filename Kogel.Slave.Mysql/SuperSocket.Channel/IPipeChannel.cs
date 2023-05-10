@@ -3,7 +3,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Channel
 {
-
 	public interface IPipeChannel
 	{
 		Pipe In { get; }

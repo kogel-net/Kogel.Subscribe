@@ -9,8 +9,6 @@ using SuperSocket.Channel;
 using SuperSocket.Client;
 using Kogel.Dapper.Extension;
 using System.Linq;
-using System.Data;
-using Kogel.Slave.Mysql.Extensions;
 
 namespace Kogel.Slave.Mysql
 {

@@ -12,7 +12,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Client
 {
-
 	public class EasyClient<TPackage, TSendPackage> : EasyClient<TPackage>, IEasyClient<TPackage, TSendPackage>, IEasyClient<TPackage> where TPackage : class
 	{
 		private IPackageEncoder<TSendPackage> _packageEncoder;

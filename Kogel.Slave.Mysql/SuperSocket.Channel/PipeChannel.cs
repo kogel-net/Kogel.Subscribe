@@ -10,7 +10,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Channel
 {
-
 	public abstract class PipeChannel<TPackageInfo> : ChannelBase<TPackageInfo>, IChannel<TPackageInfo>, IChannel, IPipeChannel
 	{
 		private IPipelineFilter<TPackageInfo> _pipelineFilter;

@@ -2,7 +2,6 @@ using System.Buffers;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public class TransparentPipelineFilter<TPackageInfo> : PipelineFilterBase<TPackageInfo> where TPackageInfo : class
 	{
 		public override TPackageInfo Filter(ref SequenceReader<byte> reader)

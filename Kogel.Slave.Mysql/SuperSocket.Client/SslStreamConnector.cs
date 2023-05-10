@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace SuperSocket.Client
 {
-
 	public class SslStreamConnector : ConnectorBase
 	{
 		public SslClientAuthenticationOptions Options { get; private set; }

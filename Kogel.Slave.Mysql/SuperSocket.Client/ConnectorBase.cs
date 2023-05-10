@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace SuperSocket.Client
 {
-
 	public abstract class ConnectorBase : IConnector
 	{
 		public IConnector NextConnector { get; private set; }

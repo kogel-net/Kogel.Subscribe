@@ -2,7 +2,6 @@ using System.Buffers;
 
 namespace SuperSocket.ProtoBase
 {
-
 	public abstract class PackagePartsPipelineFilter<TPackageInfo> : IPipelineFilter<TPackageInfo>, IPipelineFilter where TPackageInfo : class
 	{
 		private IPackagePartReader<TPackageInfo> _currentPartReader;

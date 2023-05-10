@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Kogel.Slave.Mysql
+﻿namespace Kogel.Slave.Mysql
 {
     public class LoginResult
     {

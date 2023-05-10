@@ -8,7 +8,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Channel
 {
-
 	public class TcpPipeChannel<TPackageInfo> : PipeChannel<TPackageInfo>
 	{
 		private Socket _socket;

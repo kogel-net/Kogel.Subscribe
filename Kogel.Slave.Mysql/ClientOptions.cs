@@ -1,5 +1,4 @@
 ﻿using MySql.Data.MySqlClient;
-
 namespace Kogel.Slave.Mysql
 {
     public class ClientOptions

@@ -7,7 +7,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Channel
 {
-
 	public interface IChannel
 	{
 		bool IsClosed { get; }

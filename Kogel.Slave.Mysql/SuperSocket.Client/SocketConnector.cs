@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace SuperSocket.Client
 {
-
 	public class SocketConnector : ConnectorBase
 	{
 		public IPEndPoint LocalEndPoint { get; private set; }

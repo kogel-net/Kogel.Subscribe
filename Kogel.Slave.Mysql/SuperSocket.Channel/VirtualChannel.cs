@@ -6,7 +6,6 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.Channel
 {
-
 	public abstract class VirtualChannel<TPackageInfo> : PipeChannel<TPackageInfo>, IVirtualChannel, IChannel
 	{
 		public VirtualChannel(IPipelineFilter<TPackageInfo> pipelineFilter, ChannelOptions options)
