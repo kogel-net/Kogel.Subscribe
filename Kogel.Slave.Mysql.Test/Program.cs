@@ -4,6 +4,8 @@ using MySql.Data.MySqlClient;
 using System.Threading.Tasks;
 using SuperSocket.Client;
 using Kogel.Dapper.Extension.Core.SetQ;
+using System.Text.Json;
+using System.Text;
 
 namespace Kogel.Slave.Mysql.Test
 {
@@ -16,7 +18,7 @@ namespace Kogel.Slave.Mysql.Test
             var options = new ClientOptions
             {
                 Server = "127.0.0.1",
-                Port = 3307,
+                Port = 3306,
                 UserName = "root",
                 Password = "123456"
             };
