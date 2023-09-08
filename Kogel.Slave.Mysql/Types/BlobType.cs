@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Text;
 using Kogel.Slave.Mysql.Extensions;
 
 namespace Kogel.Slave.Mysql
@@ -11,7 +12,9 @@ namespace Kogel.Slave.Mysql
 
             try
             {
-                return reader.Sequence.Slice(reader.Consumed, blobLength).ToArray();
+                var blobs = reader.Sequence.Slice(reader.Consumed, blobLength).ToArray();
+                var blobValue = Encoding.UTF8.GetString(blobs);
+                return blobValue;
             }
             finally
             {

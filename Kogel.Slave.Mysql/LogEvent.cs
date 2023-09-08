@@ -32,6 +32,7 @@ namespace Kogel.Slave.Mysql
             DataTypes[(int)ColumnType.DATETIME] = new DateTimeType();
             DataTypes[(int)ColumnType.DATETIME_V2] = new DateTimeV2Type();
             DataTypes[(int)ColumnType.JSON] = new JsonType();
+            DataTypes[(int)ColumnType.BLOB] = new BlobType();
         }
 
         protected internal abstract void DecodeBody(ref SequenceReader<byte> reader, object context);

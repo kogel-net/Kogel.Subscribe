@@ -22,7 +22,7 @@ namespace Kogel.Slave.Mysql.Test
                 UserName = "root",
                 Password = "123456"
             };
-            string sql = options.GetConnectionString();
+
             var client = new SlaveClient(options);
 
             client.PackageHandler += Client_PackageHandler;
@@ -41,10 +41,13 @@ namespace Kogel.Slave.Mysql.Test
         private static async ValueTask Client_PackageHandler(EasyClient<LogEvent> sender, LogEvent package)
         {
             Type eventType = package.GetType();
+
+            //更新
             if (eventType.Equals(typeof(UpdateRowsEvent)))
             {
-
+                 
             }
+            //新增
             else if (eventType.Equals(typeof(RowsEvent)))
             {
 
