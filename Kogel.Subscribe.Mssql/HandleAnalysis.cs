@@ -240,11 +240,11 @@ namespace Kogel.Subscribe.Mssql
                 string execSql = $@"SELECT * FROM(
 									    SELECT 
 										    ROW_NUMBER() OVER(order by [__$seqval] asc) as [row],
-	                                        convert(varchar(50), __$seqval, 1) AS [__$seqval],
+	                                        convert(bigint, __$seqval, 1) AS [__$seqval],
 	                                        [__$operation], 
                                             {string.Join(",", GetTableFields())}
                                         FROM {GetCtTableName()} 
-                                        WHERE [__$seqval] > {_lastSeqval}
+                                        WHERE convert(bigint, __$seqval, 1) > {_lastSeqval}
 									    ) T
 								    WHERE T.[row] BETWEEN 1 AND {_context.Options.CdcConfig.Limit}";
                 var changeData = ToCT(connection.QueryDataTable(execSql));
