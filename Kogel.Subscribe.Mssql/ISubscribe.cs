@@ -1,6 +1,4 @@
 ﻿using Kogel.Subscribe.Mssql.Entites;
-using System;
-using System.Collections.Generic;
 
 namespace Kogel.Subscribe.Mssql
 {

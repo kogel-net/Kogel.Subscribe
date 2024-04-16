@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-
-namespace Kogel.Subscribe.Mssql
+﻿namespace Kogel.Subscribe.Mssql
 {
     /// <summary>
     /// 应用程序入口

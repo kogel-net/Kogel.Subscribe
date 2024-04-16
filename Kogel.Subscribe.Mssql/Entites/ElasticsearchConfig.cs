@@ -1,11 +1,4 @@
-﻿using Nest;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using System.Linq.Expressions;
-
-namespace Kogel.Subscribe.Mssql.Entites
+﻿namespace Kogel.Subscribe.Mssql.Entites
 {
     /// <summary>
     /// Elasticsearch配置参数

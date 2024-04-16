@@ -1,5 +1,4 @@
 ﻿using Kogel.Subscribe.Mssql.Middleware;
-using System;
 
 namespace Kogel.Subscribe.Mssql
 {

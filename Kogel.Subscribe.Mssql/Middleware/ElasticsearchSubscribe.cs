@@ -1,11 +1,5 @@
-﻿using Kogel.Dapper.Extension;
-using Kogel.Subscribe.Mssql.Entites;
+﻿using Kogel.Subscribe.Mssql.Entites;
 using Kogel.Subscribe.Mssql.Entites.Enum;
-using Nest;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
@@ -75,7 +69,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
                 if (message.Operation == OperationEnum.DELETE)
                 {
                     //获取主键属性
-                    var (idName, idProperty) = GetIdentity();
+                    var (idName, idProperty) = typeof(T).GetIdentity();
                     var id = idProperty.GetValue(message.Result);
                     if (isShards)
                         _defaultClient.Delete(DocumentPath<T>.Id(new Id(id)), i => i.Index(message.EsIndexName));
@@ -111,32 +105,6 @@ namespace Kogel.Subscribe.Mssql.Middleware
                 var esIndexName = GetIndexName();
                 return messageList.Select(message => message.ToEsSubscribeMessage(esIndexName)).ToList();
             }
-        }
-
-        //主键名称
-        private string _identityName;
-        //主键反射对象
-        private PropertyInfo _identityProperty;
-        /// <summary>
-        /// 获取主键属性
-        /// </summary>
-        /// <returns></returns>
-        private (string, PropertyInfo) GetIdentity()
-        {
-            if (string.IsNullOrEmpty(_identityName))
-            {
-                var entity = EntityCache.QueryEntity(typeof(T));
-                try
-                {
-                    _identityName = entity.Identitys;
-                    _identityProperty = entity.EntityFieldList.FirstOrDefault(x => x.FieldName.Contains(_identityName)).PropertyInfo;
-                }
-                catch
-                {
-                    throw new Exception($"请用特性[Identity]标记表{entity.Name}的主键特性!");
-                }
-            }
-            return (_identityName, _identityProperty);
         }
 
         /// <summary>

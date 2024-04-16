@@ -1,8 +1,5 @@
-﻿using Confluent.Kafka;
-using Kogel.Subscribe.Mssql.Entites;
+﻿using Kogel.Subscribe.Mssql.Entites;
 using Kogel.Subscribe.Mssql.Entites.Enum;
-using RabbitMQ.Client;
-using System.Collections.Generic;
 
 namespace Kogel.Subscribe.Mssql
 {

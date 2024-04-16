@@ -1,4 +1,5 @@
 ﻿using Kogel.Subscribe.Mssql.Entites;
+using Kogel.Subscribe.Mssql.Entites.Enum;
 using Kogel.Subscribe.Mssql.Test.Models;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
 
             builder.BuildCdcConfig(new CdcConfig
             {
-                OffsetPosition = Entites.Enum.OffsetPositionEnum.Abort,
+                OffsetPosition = OffsetPositionEnum.Abort,
                 IsFirstScanFull = true
             });
         }

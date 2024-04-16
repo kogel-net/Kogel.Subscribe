@@ -1,8 +1,6 @@
-﻿using Kogel.Dapper.Extension;
-using Kogel.Subscribe.Mssql.Entites;
+﻿using Kogel.Subscribe.Mssql.Entites;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Kogel.Subscribe.Mssql.Test.Subscribe
 {
@@ -11,7 +9,7 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class BaseSubscribe<T> : Subscribe<T>
-        where T : class, IBaseEntity
+        where T : class
     {
         public override void OnConfiguring(OptionsBuilder<T> builder)
         {
@@ -41,7 +39,7 @@ namespace Kogel.Subscribe.Mssql.Test.Subscribe
         {
             foreach (var message in messageList)
             {
-                Console.WriteLine($"执行动作:{message.Operation}，更新的表:{message.TableName}，更新的id:{message.Result.GetId()}");
+                Console.WriteLine($"执行动作:{message.Operation}，更新的表:{message.TableName}，更新的id:{message.Result}");
             }
         }
     }

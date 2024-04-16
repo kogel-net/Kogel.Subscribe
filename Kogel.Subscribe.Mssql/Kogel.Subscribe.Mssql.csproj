@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
 	<PackageId>Kogel.Subscribe.Mssql</PackageId>
 	<PackageTags>SQL Server增量订阅</PackageTags>
 	<Title>SQL Server增量订阅</Title>
@@ -16,8 +16,9 @@
 
   <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="1.9.3" />
+    <PackageReference Include="Dapper" Version="2.1.35" />
+	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
     <PackageReference Include="Elasticsearch.Net" Version="7.17.5" />
-    <PackageReference Include="Kogel.Dapper.Extension.Mssql" Version="3.2.2.4" />
     <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />

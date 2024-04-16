@@ -1,10 +1,5 @@
 ﻿using Kogel.Subscribe.Mssql.Entites;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Linq;
-using System.IO;
+
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
@@ -44,6 +39,7 @@ namespace Kogel.Subscribe.Mssql.Middleware
         /// </summary>
         public void Dispose()
         {
+            this._context.VolumeFile.Dispose();
         }
     }
 
@@ -52,25 +48,14 @@ namespace Kogel.Subscribe.Mssql.Middleware
     /// </summary>
     public class VolumeFile<T> : IDisposable
     {
-        private readonly string _path;
-
-        private readonly ObjectLock @lock;
+        private string _path;
 
         private readonly SubscribeContext<T> _context;
 
         public VolumeFile(SubscribeContext<T> context)
         {
             _context = context;
-            if (string.IsNullOrEmpty(_path))
-            {
-                _path = $"{Directory.GetCurrentDirectory()}//volumes//{DateTime.Now.ToString("yyyyMMdd")}_{context.TableName}.txt";
-                string directoryFullName = Path.GetDirectoryName(_path);
-                if (!Directory.Exists(directoryFullName))
-                {
-                    Directory.CreateDirectory(directoryFullName);
-                }
-                @lock = ObjectLock.CreateOrGet(_path);
-            }
+
         }
 
         /// <summary>
@@ -119,15 +104,24 @@ namespace Kogel.Subscribe.Mssql.Middleware
         }
 
         private StreamWriter _streamWriter;
+
         /// <summary>
         /// 写入seq
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="context"></param>
+        /// <param name="seqval"></param>
         public void WriteSeqval(string seqval)
         {
-            lock (@lock)
+            lock (_context)
             {
+                if (string.IsNullOrEmpty(_path))
+                {
+                    _path = $"{Directory.GetCurrentDirectory()}//volumes//{DateTime.Now.ToString("yyyyMMdd")}_{_context.TableName}.txt";
+                    string directoryFullName = Path.GetDirectoryName(_path);
+                    if (!Directory.Exists(directoryFullName))
+                    {
+                        Directory.CreateDirectory(directoryFullName);
+                    }
+                }
                 if (_streamWriter is null)
                 {
                     _streamWriter = File.Exists(_path) ? new StreamWriter(GetFileStream(_path, true)) : File.CreateText(_path);

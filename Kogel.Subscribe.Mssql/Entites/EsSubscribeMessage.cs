@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Kogel.Subscribe.Mssql.Entites
+﻿namespace Kogel.Subscribe.Mssql.Entites
 {
     /// <summary>
     /// 

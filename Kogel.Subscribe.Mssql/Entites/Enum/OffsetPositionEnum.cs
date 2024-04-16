@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Kogel.Subscribe.Mssql.Entites.Enum
+﻿namespace Kogel.Subscribe.Mssql.Entites.Enum
 {
     /// <summary>
     /// 偏移量位置

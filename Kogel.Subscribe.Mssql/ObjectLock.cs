@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-
-namespace Kogel.Subscribe.Mssql
+﻿namespace Kogel.Subscribe.Mssql
 {
     /// <summary>
     /// 对象锁
     /// </summary>
     public sealed class ObjectLock : object
     {
-        private static readonly ThreadLocal<ObjectLock> _local = new ThreadLocal<ObjectLock>(true);
+        private static readonly ThreadLocal<ObjectLock> _local = new(true);
         private readonly string _key;
         private ObjectLock(string key)
         {

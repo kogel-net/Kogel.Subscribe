@@ -1,10 +1,4 @@
 ﻿using Kogel.Subscribe.Mssql.Entites;
-using System;
-using System.Collections.Generic;
-using Confluent.Kafka;
-using Newtonsoft.Json;
-using System.Linq;
-using System.Threading;
 
 namespace Kogel.Subscribe.Mssql.Middleware
 {
